@@ -1,0 +1,6 @@
+# UUID                                  	Group Name
+#
+89418505f960477d2bff9398c7967eac27807233	Non-Interactive snmp users
+global:Anonymous-Users                  	Anonymous Users
+global:Registered-Users                 	Registered Users
+ldap:cn=gerrit-snmp-committers,ou=Groups,dc=opendaylight,dc=org	ldap/gerrit-snmp-committers
