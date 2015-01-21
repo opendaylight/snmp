@@ -21,14 +21,30 @@
     <packaging>pom</packaging>
 
     <properties>
+        <!-- Use these properties when building to run on a Helium release -->
+        <!--
+        <yangtools.version>0.6.2-Helium</yangtools.version>
+        <ietf-yang-types.version>2010.09.24.4-Helium</ietf-yang-types.version>
+        <ietf-inet-types.version>2010.09.24.3</ietf-inet-types.version>
+        <controller.version>1.4.2-Helium</controller.version>
+        <mdsal.version>1.1-Helium</mdsal.version>
+        -->
+
+        <!-- Use these properties when building to run on the latest code (SNAPSHOT)  -->
+        <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
+        <ietf-yang-types.version>2010.09.24.7-SNAPSHOT</ietf-yang-types.version>
+        <ietf-inet-types.version>2010.09.24.7-SNAPSHOT</ietf-inet-types.version>
+        <controller.version>1.5.0-SNAPSHOT</controller.version>
+        <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-        <ietf-inet-types.version>2010.09.24.3</ietf-inet-types.version>
-        <ietf-yang-types.version>2010.09.24.4-Helium</ietf-yang-types.version>
-        <yangtools.version>0.6.2-Helium</yangtools.version>
         <osgi.core.version>4.2.0</osgi.core.version>
         <slf4j.version>[1.7,2)</slf4j.version>
+
+        <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
+        <salGeneratorPath>target/generated-sources/sal</salGeneratorPath>
     </properties>
 
     <!-- Opendaylight repository list -->
@@ -121,6 +137,28 @@
                             </dependency>
                     </dependencies>
                 </plugin>
+
+                <!-- clean the project's working directories of the auto generated files -->
+                <plugin>
+                  <artifactId>maven-clean-plugin</artifactId>
+                  <configuration>
+                    <filesets>
+                      <fileset>
+                        <directory>${jmxGeneratorPath}</directory>
+                        <includes>
+                          <include>**</include>
+                        </includes>
+                      </fileset>
+                      <fileset>
+                        <directory>${salGeneratorPath}</directory>
+                        <includes>
+                          <include>**</include>
+                        </includes>
+                      </fileset>
+                    </filesets>
+                  </configuration>
+                </plugin>
+
             </plugins>
         </pluginManagement>
     </build>

@@ -56,6 +56,7 @@ public class SNMPImpl implements SnmpService{
     TransportMapping transport;
 
     public SNMPImpl() {
+    	LOG.info("SNMPImpl started");
         try {
             transport = new DefaultUdpTransportMapping();
             snmp = new Snmp(transport);
@@ -121,7 +122,7 @@ public class SNMPImpl implements SnmpService{
                         if (binding.getOid() == null ||
                                 binding.getOid().size() < oid.size() ||
                                 oid.leftMostCompare(oid.size(), binding.getOid()) != 0 ||
-                                binding.getOid().compareTo(oid) <= 0) {
+                                binding.getOid().compareTo(oid) < 0) {
 
                             stop = true;
                             break;
