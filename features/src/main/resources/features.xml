@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+     (c) Copyright 2014 Hewlett-Packard Development Company, L.P.
+
+     This program is made available under the terms of the 
+     Eclipse Public License v1.0 which accompanies this distribution,
+     and is available at http://www.eclipse.org/legal/epl-v10.html
+-->
+<features name="odl-snmp-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+
+    <!-- https://wiki.opendaylight.org/view/Runtime:Karaf_Features_Guidelines#Feature_Best_Practices -->
+    <repository>mvn:org.opendaylight.yangtools/features-yangtools/${yangtools.version}/xml/features</repository>
+
+    <!-- utility jar/bundles common to several features -->
+    <feature name='odl-snmp-plugin' version='${project.version}' description='OpenDaylight :: snmp-plugin :: SNMP '>
+         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.snmp4j/2.3.1_1</bundle>
+         <bundle>mvn:org.slf4j/slf4j-jdk14/1.7.5</bundle>
+
+        <bundle>mvn:org.opendaylight.snmp/mibs-model/${project.version}</bundle>
+        <bundle>mvn:org.opendaylight.snmp/snmp/${project.version}</bundle>
+    </feature>
+
+</features>
