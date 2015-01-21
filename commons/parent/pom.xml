@@ -21,84 +21,29 @@
     <packaging>pom</packaging>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <ietf-inet-types.version>2010.09.24.3</ietf-inet-types.version>
-        <ietf-yang-types.version>2010.09.24.4-Helium</ietf-yang-types.version>
+        <!-- Use these properties when building to run on a Helium release -->
+        <!--
         <yangtools.version>0.6.2-Helium</yangtools.version>
-        <osgi.core.version>4.2.0</osgi.core.version>
-        <slf4j.version>[1.7,2)</slf4j.version>
+        <ietf-yang-types.version>2010.09.24.4-Helium</ietf-yang-types.version>
+        <ietf-inet-types.version>2010.09.24.3</ietf-inet-types.version>
+        <controller.version>1.4.2-Helium</controller.version>
+        <mdsal.version>1.1-Helium</mdsal.version>
+        <config.version>0.2.5-Helium</config.version>
+        -->
+
+        <!-- Use these properties when building to run on the latest code (SNAPSHOT)  -->
+        <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
+        <ietf-yang-types.version>2010.09.24.7-SNAPSHOT</ietf-yang-types.version>
+        <ietf-inet-types.version>2010.09.24.7-SNAPSHOT</ietf-inet-types.version>
+        <controller.version>1.5.0-SNAPSHOT</controller.version>
+        <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
+        <config.version>0.3.0-SNAPSHOT</config.version>
+
+        <apache.servicemix.version>2.3.1_1</apache.servicemix.version>
+
+        <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
+        <salGeneratorPath>target/generated-sources/sal</salGeneratorPath>
     </properties>
-
-    <!-- Opendaylight repository list -->
-    <repositories>
-        <!-- Opendaylight public group -->
-        <repository>
-            <id>opendaylight-public</id>
-            <name>opendaylight-public</name>
-            <url>http://nexus.opendaylight.org/content/groups/public/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-        </repository>
-        <!-- OpenDayLight Released artifact -->
-        <repository>
-            <id>opendaylight-release</id>
-            <name>opendaylight-release</name>
-            <url>http://nexus.opendaylight.org/content/repositories/opendaylight.release/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <!-- OpenDayLight Snapshot artifact -->
-        <repository>
-            <id>opendaylight-snapshot</id>
-            <name>opendaylight-snapshot</name>
-            <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <!-- OpenDayLight Repo Mirror -->
-        <pluginRepository>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>opendaylight-mirror</id>
-            <name>opendaylight-mirror</name>
-            <url>http://nexus.opendaylight.org/content/groups/public/</url>
-        </pluginRepository>
-        <!-- OpenDayLight Snapshot artifact -->
-        <pluginRepository>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>opendaylight-snapshot</id>
-            <name>opendaylight-snapshot</name>
-            <url>http://nexus.opendaylight.org/content/repositories/opendaylight.snapshot/</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
         <pluginManagement>
@@ -121,6 +66,28 @@
                             </dependency>
                     </dependencies>
                 </plugin>
+
+                <!-- clean the project's working directories of the auto generated files -->
+                <plugin>
+                  <artifactId>maven-clean-plugin</artifactId>
+                  <configuration>
+                    <filesets>
+                      <fileset>
+                        <directory>${jmxGeneratorPath}</directory>
+                        <includes>
+                          <include>**</include>
+                        </includes>
+                      </fileset>
+                      <fileset>
+                        <directory>${salGeneratorPath}</directory>
+                        <includes>
+                          <include>**</include>
+                        </includes>
+                      </fileset>
+                    </filesets>
+                  </configuration>
+                </plugin>
+
             </plugins>
         </pluginManagement>
     </build>

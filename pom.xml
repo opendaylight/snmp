@@ -26,5 +26,6 @@
         <module>yang-oid-plugin</module>
         <module>mibs-model</module>
         <module>snmp</module>
+        <module>features</module>
     </modules>
 </project>
