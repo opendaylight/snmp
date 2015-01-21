@@ -1,0 +1,129 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_02569fd2",
+        "filename": "features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-21T23:53:12Z",
+      "side": 1,
+      "message": "Do we need MD-sal?",
+      "revId": "c7b8b5537bed5d553113c1a5307d33011322de0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8242af0e",
+        "filename": "features/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-21T23:53:12Z",
+      "side": 1,
+      "message": "Pretty sure we don\u0027t need flow.",
+      "revId": "c7b8b5537bed5d553113c1a5307d33011322de0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_424ca742",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-21T23:53:12Z",
+      "side": 1,
+      "message": "We don\u0027t need flow. Do we need MD-SAL? I\u0027m assuming we need yangtools, but we\u0027re not pulling any features below.",
+      "revId": "c7b8b5537bed5d553113c1a5307d33011322de0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6247631e",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-21T23:53:12Z",
+      "side": 1,
+      "message": "There was discussion recently that they don\u0027t want \u0027all\u0027 anymore as it leads to confusion. I\u0027d say for now just call it \u0027odl-snmp-framework\u0027 or something that describes what it actually supports.",
+      "revId": "c7b8b5537bed5d553113c1a5307d33011322de0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_a2cecbb2",
+        "filename": "snmp/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-21T23:53:12Z",
+      "side": 1,
+      "message": "If we don\u0027t need this anymore, I would just delete it. You can see the old version using the git history.",
+      "revId": "c7b8b5537bed5d553113c1a5307d33011322de0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_42c5878c",
+        "filename": "snmp/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-21T23:53:12Z",
+      "side": 1,
+      "message": "this should be project.version unless we expect the versions to differ internally?",
+      "range": {
+        "startLine": 135,
+        "startChar": 21,
+        "endLine": 135,
+        "endChar": 33
+      },
+      "revId": "c7b8b5537bed5d553113c1a5307d33011322de0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c25f57e4",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-21T23:53:12Z",
+      "side": 1,
+      "message": "I would lower this to debug or trace level if you want to keep it.",
+      "revId": "c7b8b5537bed5d553113c1a5307d33011322de0b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
