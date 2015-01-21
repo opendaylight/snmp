@@ -54,9 +54,7 @@
                                         org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
                                     </codeGeneratorClass>
                                     <!-- directory into which generated files will be placed -->
-                                    <outputBaseDir>
-                                        target/generated-sources/sal
-                                    </outputBaseDir>
+                                    <outputBaseDir>${salGeneratorPath}</outputBaseDir>
                                 </generator>
                             </codeGenerators>
                             <!-- if true, plugin will search for yang files also in dependent projects -->

@@ -29,7 +29,9 @@
                     <instructions>
                         <Import-Package>*</Import-Package>
                         <Export-Package>
-                            org.opendaylight.snmp.plugin.internal
+                            org.opendaylight.snmp.plugin.internal,
+                            org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922,
+                            org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.send.snmp.query.output
                         </Export-Package>
                         <Bundle-Activator>
                             org.opendaylight.snmp.plugin.internal.SNMPProvider
@@ -38,35 +40,53 @@
                     <manifestLocation>${project.basedir}/META-INF</manifestLocation>
                 </configuration>
             </plugin>
+
+            <!-- New yang-maven-plugin code, copied from DIDM project -->
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
                 <version>${yangtools.version}</version>
                 <executions>
                     <execution>
+                        <id>config</id>
                         <goals>
                             <goal>generate-sources</goal>
                         </goals>
                         <configuration>
-                            <!-- directory containing yang files to parse and generate code -->
-                            <yangFilesRootDir>src/main/yang</yangFilesRootDir>
                             <codeGenerators>
                                 <generator>
-                                    <codeGeneratorClass>
-                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
-                                    </codeGeneratorClass>
-                                    <!-- directory into which generated files will be placed -->
-                                    <outputBaseDir>
-                                        target/generated-sources/sal
-                                    </outputBaseDir>
+                                    <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
+                                    <outputBaseDir>${jmxGeneratorPath}</outputBaseDir>
+                                    <additionalConfiguration>
+                                        <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
+                                    </additionalConfiguration>
+                                </generator>
+                                <generator>
+                                    <codeGeneratorClass>org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl</codeGeneratorClass>
+                                    <outputBaseDir>${salGeneratorPath}</outputBaseDir>
                                 </generator>
                             </codeGenerators>
-                            <!-- if true, plugin will search for yang files also in dependent projects -->
                             <inspectDependencies>true</inspectDependencies>
                         </configuration>
                     </execution>
                 </executions>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.opendaylight.yangtools</groupId>
+                        <artifactId>maven-sal-api-gen-plugin</artifactId>
+                        <version>${yangtools.version}</version>
+                        <type>jar</type>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>org.opendaylight.controller</groupId>
+                        <artifactId>yang-jmx-generator-plugin</artifactId>
+                        <version>0.2.5-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
             </plugin>
+            <!-- End of new yagn-maven-plugin copied from DIDM project -->
 
         </plugins>
     </build>
@@ -84,12 +104,12 @@
         <dependency>
             <groupId>org.opendaylight.snmp</groupId>
             <artifactId>mibs-model</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>sal-binding-api</artifactId>
-            <version>1.1-Helium</version>
+            <version>${mdsal.version}</version>
         </dependency>
     </dependencies>
 </project>
