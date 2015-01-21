@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014-2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -121,7 +121,7 @@ public class SNMPImpl implements SnmpService{
                         if (binding.getOid() == null ||
                                 binding.getOid().size() < oid.size() ||
                                 oid.leftMostCompare(oid.size(), binding.getOid()) != 0 ||
-                                binding.getOid().compareTo(oid) <= 0) {
+                                binding.getOid().compareTo(oid) < 0) {
 
                             stop = true;
                             break;
