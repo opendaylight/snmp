@@ -121,7 +121,7 @@ public class SNMPImpl implements SnmpService{
                         if (binding.getOid() == null ||
                                 binding.getOid().size() < oid.size() ||
                                 oid.leftMostCompare(oid.size(), binding.getOid()) != 0 ||
-                                binding.getOid().compareTo(oid) <= 0) {
+                                binding.getOid().compareTo(oid) < 0) {
 
                             stop = true;
                             break;
