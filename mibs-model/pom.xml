@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
- * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.
+ * Copyright (c) 2014-2015 Cisco Systems, Inc. and others.  All rights reserved.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
@@ -31,7 +31,8 @@
                             org.opendaylight.snmp,
                             org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ieee.types.rev080522.*,
                             org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2.*,
-                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.yang.smi.rev080320.*
+                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.yang.smi.rev080320.*,
+                            org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924
                         </Export-Package>
                     </instructions>
                 </configuration>
@@ -54,9 +55,7 @@
                                         org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
                                     </codeGeneratorClass>
                                     <!-- directory into which generated files will be placed -->
-                                    <outputBaseDir>
-                                        target/generated-sources/sal
-                                    </outputBaseDir>
+                                    <outputBaseDir>${salGeneratorPath}</outputBaseDir>
                                 </generator>
                             </codeGenerators>
                             <!-- if true, plugin will search for yang files also in dependent projects -->
