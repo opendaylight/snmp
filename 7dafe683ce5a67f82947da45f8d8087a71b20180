@@ -1,0 +1,248 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_ede7e310",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "These can all be removed. They are defined in odlparent.",
+      "range": {
+        "startLine": 40,
+        "startChar": 8,
+        "endLine": 44,
+        "endChar": 46
+      },
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_cdec67f6",
+        "filename": "features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "This exists in odlparent",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6dbbd3e5",
+        "filename": "features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "this is maven.surefire.version in odlparent.",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6d751397",
+        "filename": "features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "You need to include your md-sal feature dependency here. I hit errors if I have an empty maven repo.",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_edafe3e1",
+        "filename": "features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "this can be slf4j.version",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_0dab2fd7",
+        "filename": "features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "Let\u0027s make this a common property.",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ad347bde",
+        "filename": "features/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "You don\u0027t explicitly need guava since it\u0027s included with yangtools.",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_cdb46737",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "2015? ;)",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_adb9db2f",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "As with the pom, use a property here.",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6a197987",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "We shouldn\u0027t need slf4j. My understanding is it is built in to karaf.",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2a137167",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "Guava is already be included by the yangtools feature, so this can be removed as well.",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4a16fd56",
+        "filename": "features/src/main/resources/features.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "Remove if not needed ;)",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4df7f7f5",
+        "filename": "snmp/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "This should be 0.3.0-SNAPSHOT, and should move to a config subsystem property.",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_eddda371",
+        "filename": "snmp/pom.xml",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-22T23:27:26Z",
+      "side": 1,
+      "message": "This should be a property.",
+      "revId": "7dafe683ce5a67f82947da45f8d8087a71b20180",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
