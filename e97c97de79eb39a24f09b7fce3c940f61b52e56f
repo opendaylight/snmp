@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_b8ed9bb9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 8
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-23T01:52:07Z",
+      "side": 1,
+      "message": "I don\u0027t think you meant to add this to the commit message, did you?",
+      "revId": "e97c97de79eb39a24f09b7fce3c940f61b52e56f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d8d187fc",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 8
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-23T01:52:07Z",
+      "side": 1,
+      "message": "After our generated file output discussion, I don\u0027t think you need this section if the files are put under target. They\u0027ll be deleted on clean automatically.",
+      "range": {
+        "startLine": 70,
+        "startChar": 16,
+        "endLine": 89,
+        "endChar": 25
+      },
+      "revId": "e97c97de79eb39a24f09b7fce3c940f61b52e56f",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
