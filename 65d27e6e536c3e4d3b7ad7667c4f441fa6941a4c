@@ -1,0 +1,129 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_18a60f11",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-23T00:54:57Z",
+      "side": 1,
+      "message": "2014-2015",
+      "revId": "65d27e6e536c3e4d3b7ad7667c4f441fa6941a4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_789f13b5",
+        "filename": "features/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-23T00:54:57Z",
+      "side": 1,
+      "message": "2015",
+      "revId": "65d27e6e536c3e4d3b7ad7667c4f441fa6941a4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_589c97c0",
+        "filename": "features/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-23T00:54:57Z",
+      "side": 1,
+      "message": "These don\u0027t appear to be used anywhere.",
+      "range": {
+        "startLine": 24,
+        "startChar": 4,
+        "endLine": 25,
+        "endChar": 69
+      },
+      "revId": "65d27e6e536c3e4d3b7ad7667c4f441fa6941a4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d8966794",
+        "filename": "mibs-model/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-23T00:54:57Z",
+      "side": 1,
+      "message": "2014-2015",
+      "revId": "65d27e6e536c3e4d3b7ad7667c4f441fa6941a4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f891e39a",
+        "filename": "pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-23T00:54:57Z",
+      "side": 1,
+      "message": "2014-2015",
+      "revId": "65d27e6e536c3e4d3b7ad7667c4f441fa6941a4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_9890df96",
+        "filename": "snmp/pom.xml",
+        "patchSetId": 6
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-23T00:54:57Z",
+      "side": 1,
+      "message": "2014-2015",
+      "revId": "65d27e6e536c3e4d3b7ad7667c4f441fa6941a4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b88b5b67",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-23T00:54:57Z",
+      "side": 1,
+      "message": "2014-2015",
+      "revId": "65d27e6e536c3e4d3b7ad7667c4f441fa6941a4c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
