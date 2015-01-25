@@ -14,14 +14,16 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.re
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SendSnmpQueryInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SendSnmpQueryInputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SendSnmpQueryOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SendSnmpQueryOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpQueryType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpService;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.send.snmp.query.output.Results;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.send.snmp.query.output.ResultsBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.Results;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.ResultsBuilder;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
@@ -38,6 +40,7 @@ import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
@@ -50,9 +53,10 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
-public class SNMPImpl implements SnmpService{
+public class SNMPImpl implements SnmpService {
     private static final Logger LOG = LoggerFactory.getLogger(SNMPImpl.class);
     private Snmp snmp;
+    private static final Integer snmpListenPort = 161;
     TransportMapping transport;
 
     public SNMPImpl() {
@@ -62,16 +66,16 @@ public class SNMPImpl implements SnmpService{
             // Do not forget this line!
             snmp.listen();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn(e.getMessage());
         }
     }
 
     private Target getTargetForIp(Ipv4Address address, String community) {
         Address addr = null;
         try {
-            addr = new UdpAddress(Inet4Address.getByName(address.getValue()), 161);
+            addr = new UdpAddress(Inet4Address.getByName(address.getValue()), snmpListenPort);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            LOG.warn(e.getMessage());
         }
 
         CommunityTarget communityTarget = new CommunityTarget();
@@ -83,7 +87,7 @@ public class SNMPImpl implements SnmpService{
         return communityTarget;
     }
 
-    ArrayList<VariableBinding> sendQuery(SendSnmpQueryInput input) {
+    ArrayList<VariableBinding> sendQuery(SnmpGetInput input) {
 
         PDU pdu = new PDU();
         OID oid = new OID(input.getOid());
@@ -98,11 +102,11 @@ public class SNMPImpl implements SnmpService{
         Target target = getTargetForIp(input.getIpAddress(), community);
 
 
-        if (input.getQueryType().equals(SnmpQueryType.GET)) {
+        if (input.getGetType().equals(SnmpGetType.GET)) {
             pdu.setType(PDU.GET);
-        } else if (input.getQueryType().equals(SnmpQueryType.GETNEXT)) {
+        } else if (input.getGetType().equals(SnmpGetType.GETNEXT)) {
             pdu.setType(PDU.GETNEXT);
-        } else if (input.getQueryType().equals(SnmpQueryType.GETBULK)) {
+        } else if (input.getGetType().equals(SnmpGetType.GETBULK)) {
             pdu.setType(PDU.GETBULK);
         }
 
@@ -129,7 +133,7 @@ public class SNMPImpl implements SnmpService{
                             variableBindings.add(binding);
                         }
                     }
-                    if (!input.getQueryType().equals(SnmpQueryType.GETBULK)) {
+                    if (!input.getGetType().equals(SnmpGetType.GETBULK)) {
                         stop = true;
                     }
                     if (response.getErrorStatus() != PDU.noError) {
@@ -161,16 +165,16 @@ public class SNMPImpl implements SnmpService{
 
         ConcurrentHashMap<Integer, T> indexToBuilderObject = new ConcurrentHashMap<>();
 
-        SendSnmpQueryInputBuilder sendSnmpQueryInputBuilder = new SendSnmpQueryInputBuilder()
+        SnmpGetInputBuilder getInputBuilder = new SnmpGetInputBuilder()
                 .setIpAddress(address)
                 .setCommunity(community)
-                .setQueryType(SnmpQueryType.GETBULK);
+                .setGetType(SnmpGetType.GETBULK);
 
         ArrayList<Thread> threads = new ArrayList<>();
 
         // Iterate through all of the fields on the builder class, getting the objects, and adding them into the map
         for (Method method : builderClass.getMethods()) {
-            PopulateMibThread populateMibThread = new PopulateMibThread(method, indexToBuilderObject, sendSnmpQueryInputBuilder, builderClass, this);
+            PopulateMibThread populateMibThread = new PopulateMibThread(method, indexToBuilderObject, getInputBuilder, builderClass, this);
             threads.add(populateMibThread);
             populateMibThread.start();
         }
@@ -179,7 +183,7 @@ public class SNMPImpl implements SnmpService{
             try {
                 thread.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOG.warn(e.getMessage());
             }
         }
 
@@ -187,12 +191,12 @@ public class SNMPImpl implements SnmpService{
     }
 
     @Override
-    public Future<RpcResult<SendSnmpQueryOutput>> sendSnmpQuery(SendSnmpQueryInput input) {
-        LOG.info("Sending " + input.getQueryType() + " SNMP request for host: " + input.getIpAddress() + " for OID: " + input.getOid() + " Community: " + input.getCommunity());
+    public Future<RpcResult<SnmpGetOutput>> snmpGet(SnmpGetInput input) {
+        LOG.info("Sending " + input.getGetType() + " SNMP request for host: " + input.getIpAddress() + " for OID: " + input.getOid() + " Community: " + input.getCommunity());
 
         ArrayList<Results> resultsArrayList = new ArrayList<>();
 
-        SendSnmpQueryOutputBuilder sendSnmpQueryOutputBuilder = new SendSnmpQueryOutputBuilder();
+        SnmpGetOutputBuilder getOutputBuilder = new SnmpGetOutputBuilder();
 
         ArrayList<VariableBinding> variableBindings = sendQuery(input);
         for (VariableBinding variableBinding : variableBindings) {
@@ -205,9 +209,64 @@ public class SNMPImpl implements SnmpService{
             resultsArrayList.add(resultsBuilder.build());
         }
 
-        sendSnmpQueryOutputBuilder.setResults(resultsArrayList);
-        RpcResultBuilder<SendSnmpQueryOutput> rpcResultBuilder = RpcResultBuilder.success();
-        rpcResultBuilder.withResult(sendSnmpQueryOutputBuilder.build());
+        getOutputBuilder.setResults(resultsArrayList);
+        RpcResultBuilder<SnmpGetOutput> rpcResultBuilder = RpcResultBuilder.success();
+        rpcResultBuilder.withResult(getOutputBuilder.build());
+        return Futures.immediateFuture(rpcResultBuilder.build());
+    }
+
+    @Override
+    public Future<RpcResult<Void>> snmpSet(SnmpSetInput input) {
+        RpcResultBuilder<Void> rpcResultBuilder = RpcResultBuilder.success();
+        PDU pdu = new PDU();
+        OID oid = new OID(input.getOid());
+        Variable variable = new OctetString(input.getValue());
+        pdu.add(new VariableBinding(oid, variable));
+        pdu.setType(PDU.SET);
+
+
+        String community = input.getCommunity();
+        if (community == null) {
+            community = "public";
+        }
+
+        Target target = getTargetForIp(input.getIpAddress(), community);
+
+        try {
+            ResponseEvent responseEvent = snmp.set(pdu, target);
+            if (responseEvent != null) {
+                PDU responseEventPDU = responseEvent.getResponse();
+                if (responseEventPDU != null) {
+                    int errorStatus = responseEventPDU.getErrorStatus();
+                    if (errorStatus != PDU.noError) {
+                        // SET wasn't successfull!
+
+                        int errorIndex = responseEventPDU.getErrorIndex();
+                        String errorString = responseEventPDU.getErrorStatusText();
+
+                        rpcResultBuilder = RpcResultBuilder.failed();
+                        rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
+                                String.format("SnmpSET failed with error status: %s, error index: %s. StatusText: %s",
+                                        errorStatus, errorIndex, errorString));
+                    }
+                } else {
+                    // Response Event PDU was null
+                    rpcResultBuilder = RpcResultBuilder.failed();
+                    rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
+                            "Response PDU is null.");
+                }
+            } else {
+                // Response Event was null
+                rpcResultBuilder = RpcResultBuilder.failed();
+                rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
+                        "Response timed out.");
+            }
+        } catch (IOException e) {
+            LOG.warn(e.getMessage());
+            rpcResultBuilder = RpcResultBuilder.failed();
+            rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION, e.getMessage());
+        }
+
         return Futures.immediateFuture(rpcResultBuilder.build());
     }
 

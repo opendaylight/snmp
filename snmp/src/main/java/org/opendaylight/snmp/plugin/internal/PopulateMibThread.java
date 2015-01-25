@@ -19,7 +19,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.InterfaceIndex;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.InterfaceIndexOrZero;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2.inet.address.mib.rev050204.InetAddress;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SendSnmpQueryInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInputBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.smi.IpAddress;
@@ -38,18 +38,18 @@ public class PopulateMibThread<T> extends Thread {
     private static final Logger LOG = LoggerFactory.getLogger(PopulateMibThread.class);
     private Method method;
     private ConcurrentHashMap<Integer, T> indexToBuilderObject;
-    private SendSnmpQueryInputBuilder sendSnmpQueryInputBuilder;
+    private SnmpGetInputBuilder snmpGetInputBuilder;
     private Class builderClass;
     private SNMPImpl snmpImpl;
 
     public PopulateMibThread(Method method,
                              ConcurrentHashMap<Integer, T> indexToBuilderObject,
-                             SendSnmpQueryInputBuilder sendSnmpQueryInputBuilder,
+                             SnmpGetInputBuilder snmpGetInputBuilder,
                              Class<T> builderClass,
                              SNMPImpl snmp) {
         this.method = method;
         this.indexToBuilderObject = indexToBuilderObject;
-        this.sendSnmpQueryInputBuilder = sendSnmpQueryInputBuilder;
+        this.snmpGetInputBuilder = snmpGetInputBuilder;
         this.builderClass = builderClass;
         this.snmpImpl = snmp;
     }
@@ -67,7 +67,7 @@ public class PopulateMibThread<T> extends Thread {
         OID oid = method.getAnnotation(OID.class);
         if (oid != null) {
             String oidString = oid.value();
-            sendSnmpQueryInputBuilder.setOid(oidString);
+            snmpGetInputBuilder.setOid(oidString);
 
             org.snmp4j.smi.OID baseOID = new org.snmp4j.smi.OID(oid.value());
 
@@ -76,7 +76,7 @@ public class PopulateMibThread<T> extends Thread {
             Class objectType = null;
             try {
 
-                ArrayList<VariableBinding> variableBindings = snmpImpl.sendQuery(sendSnmpQueryInputBuilder.build());
+                ArrayList<VariableBinding> variableBindings = snmpImpl.sendQuery(snmpGetInputBuilder.build());
                 for (VariableBinding variableBinding : variableBindings) {
                     org.snmp4j.smi.OID snmpOID = variableBinding.getOid();
 
