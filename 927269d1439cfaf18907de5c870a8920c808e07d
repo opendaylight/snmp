@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_fda0e744",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 308,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-26T23:03:57Z",
+      "side": 1,
+      "message": "This could be null if the constructor failed.",
+      "revId": "927269d1439cfaf18907de5c870a8920c808e07d",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
