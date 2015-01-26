@@ -1,0 +1,170 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_dd788b2d",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-26T22:02:45Z",
+      "side": 1,
+      "message": "prefix is unnecessary",
+      "range": {
+        "startLine": 47,
+        "startChar": 30,
+        "endLine": 47,
+        "endChar": 33
+      },
+      "revId": "98a2ae9a546d8168326e5362d9d78b0f11786e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_fd9a2762",
+        "filename": "snmp/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-26T22:02:45Z",
+      "side": 1,
+      "message": "delete before submitting.",
+      "range": {
+        "startLine": 36,
+        "startChar": 24,
+        "endLine": 40,
+        "endChar": 27
+      },
+      "revId": "98a2ae9a546d8168326e5362d9d78b0f11786e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1d9ef356",
+        "filename": "snmp/pom.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-26T22:02:45Z",
+      "side": 1,
+      "message": "delete before submitting.",
+      "range": {
+        "startLine": 42,
+        "startChar": 20,
+        "endLine": 44,
+        "endChar": 23
+      },
+      "revId": "98a2ae9a546d8168326e5362d9d78b0f11786e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_5dbb1bc4",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-26T22:02:45Z",
+      "side": 1,
+      "message": "Use debug/trace or delete.",
+      "revId": "98a2ae9a546d8168326e5362d9d78b0f11786e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3db88fc7",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-26T22:02:45Z",
+      "side": 1,
+      "message": "This should cleanup all resources. I see at least one missing, which would be snmp.close().",
+      "revId": "98a2ae9a546d8168326e5362d9d78b0f11786e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_bdcb3f52",
+        "filename": "snmp/src/main/java/org/opendaylight/yang/gen/v1/urn/opendaylight/snmp/rev140922/SNMPImplModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-26T22:02:45Z",
+      "side": 1,
+      "message": "debug/trace or delete.",
+      "range": {
+        "startLine": 25,
+        "startChar": 12,
+        "endLine": 25,
+        "endChar": 16
+      },
+      "revId": "98a2ae9a546d8168326e5362d9d78b0f11786e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_7dc5b73a",
+        "filename": "snmp/src/main/resources/initial/70-snmp-impl.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-26T22:02:45Z",
+      "side": 1,
+      "message": "Remove 70 prefix.",
+      "revId": "98a2ae9a546d8168326e5362d9d78b0f11786e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_1decb3c6",
+        "filename": "snmp/src/main/yang/snmp.yang",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-01-26T22:02:45Z",
+      "side": 1,
+      "message": "Delete if not needed.",
+      "range": {
+        "startLine": 82,
+        "startChar": 12,
+        "endLine": 89,
+        "endChar": 15
+      },
+      "revId": "98a2ae9a546d8168326e5362d9d78b0f11786e2c",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
