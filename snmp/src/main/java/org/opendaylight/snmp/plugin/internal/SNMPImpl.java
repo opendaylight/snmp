@@ -8,6 +8,8 @@
 package org.opendaylight.snmp.plugin.internal;
 
 import com.google.common.util.concurrent.Futures;
+import com.google.common.base.Preconditions;
+
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntryBuilder;
@@ -53,13 +55,22 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
-public class SNMPImpl implements SnmpService {
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+
+public class SNMPImpl implements SnmpService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SNMPImpl.class);
     private Snmp snmp;
     private static final Integer snmpListenPort = 161;
     TransportMapping transport;
+    
+    private final RpcProviderRegistry rpcProviderRegistery;
+    private final BindingAwareBroker.RpcRegistration<SnmpService> rpcRegistration;
 
-    public SNMPImpl() {
+    public SNMPImpl(RpcProviderRegistry rpcProviderRegistery) {
+    	LOG.debug("SNMPImpl constructor");
+    	this.rpcProviderRegistery = Preconditions.checkNotNull(rpcProviderRegistery);
+    	
         try {
             transport = new DefaultUdpTransportMapping();
             snmp = new Snmp(transport);
@@ -68,6 +79,9 @@ public class SNMPImpl implements SnmpService {
         } catch (IOException e) {
             LOG.warn(e.getMessage());
         }
+        
+        // register this class as teh RPC service
+        this.rpcRegistration = this.rpcProviderRegistery.addRpcImplementation(SnmpService.class, this);
     }
 
     private Target getTargetForIp(Ipv4Address address, String community) {
@@ -287,5 +301,11 @@ public class SNMPImpl implements SnmpService {
         RpcResultBuilder<GetInterfacesOutput> rpcResultBuilder = RpcResultBuilder.success(getInterfacesOutputBuilder.build());
         return Futures.immediateFuture(rpcResultBuilder.build());
     }
+
+	@Override
+	public void close() throws Exception {
+		if(rpcRegistration != null) rpcRegistration.close();
+		snmp.close();
+	}
 
 }

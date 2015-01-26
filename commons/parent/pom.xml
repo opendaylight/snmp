@@ -43,6 +43,8 @@
 
         <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
         <salGeneratorPath>target/generated-sources/sal</salGeneratorPath>
+
+        <snmp.impl.configfile>snmp-impl.xml</snmp.impl.configfile>
     </properties>
 
     <build>
