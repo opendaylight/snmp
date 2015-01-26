@@ -6,6 +6,8 @@
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
 module snmp {
+    yang-version 1;
+    
     namespace "urn:opendaylight:snmp";
     prefix snmp;
     import ietf-inet-types {
@@ -14,9 +16,16 @@ module snmp {
     import IF-MIB {
         prefix if-mib;
     }
+    import config { prefix config; revision-date 2013-04-05; }
+    import opendaylight-md-sal-binding { prefix mdsal; revision-date 2013-10-28; }
 
     revision "2014-09-22" {
         description "Initial revision of cmts snmp model";
+    }
+    
+    identity snmp-impl {
+        base config:module-type;
+        config:java-name-prefix SNMPImpl;
     }
 
     typedef snmp-get-type {
@@ -61,6 +70,21 @@ module snmp {
 
                 leaf value {
                     type string;
+                }
+            }
+        }
+    }
+    
+    augment "/config:modules/config:module/config:configuration" {
+        case snmp-impl {
+            when "/config:modules/config:module/config:type = 'snmp-impl'";
+
+            container rpc-registry {
+                uses config:service-ref {
+                    refine type {
+                        mandatory true;
+                        config:required-identity mdsal:binding-rpc-registry;
+                    }
                 }
             }
         }
