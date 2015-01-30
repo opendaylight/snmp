@@ -51,7 +51,8 @@ import java.lang.reflect.Method;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Vector;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
@@ -60,6 +61,7 @@ import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 
 public class SNMPImpl implements SnmpService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SNMPImpl.class);
+    private static final String DEFAULT_COMMUNITY = "public";
     private Snmp snmp;
     private static final Integer snmpListenPort = 161;
     TransportMapping transport;
@@ -101,7 +103,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         return communityTarget;
     }
 
-    ArrayList<VariableBinding> sendQuery(SnmpGetInput input) {
+    List<VariableBinding> sendQuery(SnmpGetInput input) {
 
         PDU pdu = new PDU();
         OID oid = new OID(input.getOid());
@@ -111,10 +113,9 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         ArrayList<VariableBinding> variableBindings = new ArrayList<>();
 
         String community = input.getCommunity();
-        if (community == null) community = "public";
+        if (community == null) community = DEFAULT_COMMUNITY;
 
         Target target = getTargetForIp(input.getIpAddress(), community);
-
 
         if (input.getGetType().equals(SnmpGetType.GET)) {
             pdu.setType(PDU.GET);
@@ -130,12 +131,10 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
                 //  LOG.info("Sending Query");
                 ResponseEvent responseEvent = snmp.send(pdu, target);
                 PDU response = responseEvent.getResponse();
-                VariableBinding binding = null;
+                VariableBinding lastBinding = null;
                 if (response != null) {
-                    Vector<? extends VariableBinding> vector = response.getVariableBindings();
-
-                    for (int i=0; i<vector.size(); i++) {
-                        binding = vector.get(i);
+                    for (VariableBinding binding : response.getVariableBindings()) {
+                        lastBinding = binding;
                         if (binding.getOid() == null ||
                                 binding.getOid().size() < oid.size() ||
                                 oid.leftMostCompare(oid.size(), binding.getOid()) != 0 ||
@@ -158,9 +157,9 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
                     stop = true;
                 }
 
-                if (!stop) {
+                if (!stop && (lastBinding != null)) {
                     pdu.setRequestID(new Integer32(0));
-                    pdu.set(0, binding);
+                    pdu.set(0, lastBinding);
                 }
 
             }
@@ -171,11 +170,11 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         return variableBindings;
     }
 
-    public <T> ArrayList<T> populateMibTable(Ipv4Address address, Class<T> builderClass) {
-        return populateMibTable(address, builderClass, "public");
+    public <T> Collection<T> populateMibTable(Ipv4Address address, Class<T> builderClass) {
+        return populateMibTable(address, builderClass, DEFAULT_COMMUNITY);
     }
 
-    public <T> ArrayList<T> populateMibTable(Ipv4Address address, Class<T> builderClass, String community) {
+    public <T> Collection<T> populateMibTable(Ipv4Address address, Class<T> builderClass, String community) {
 
         ConcurrentHashMap<Integer, T> indexToBuilderObject = new ConcurrentHashMap<>();
 
@@ -184,11 +183,12 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
                 .setCommunity(community)
                 .setGetType(SnmpGetType.GETBULK);
 
-        ArrayList<Thread> threads = new ArrayList<>();
+        Method[] methods = builderClass.getMethods();
+        ArrayList<Thread> threads = new ArrayList<>(methods.length);
 
         // Iterate through all of the fields on the builder class, getting the objects, and adding them into the map
-        for (Method method : builderClass.getMethods()) {
-            PopulateMibThread populateMibThread = new PopulateMibThread(method, indexToBuilderObject, getInputBuilder, builderClass, this);
+        for (Method method : methods) {
+            PopulateMibThread populateMibThread = new PopulateMibThread<>(method, indexToBuilderObject, getInputBuilder, builderClass, this);
             threads.add(populateMibThread);
             populateMibThread.start();
         }
@@ -201,18 +201,16 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
             }
         }
 
-        return new ArrayList<>(indexToBuilderObject.values());
+        return indexToBuilderObject.values();
     }
 
     @Override
     public Future<RpcResult<SnmpGetOutput>> snmpGet(SnmpGetInput input) {
         LOG.info("Sending " + input.getGetType() + " SNMP request for host: " + input.getIpAddress() + " for OID: " + input.getOid() + " Community: " + input.getCommunity());
 
-        ArrayList<Results> resultsArrayList = new ArrayList<>();
+        List<VariableBinding> variableBindings = sendQuery(input);
+        ArrayList<Results> resultsArrayList = new ArrayList<>(variableBindings.size());
 
-        SnmpGetOutputBuilder getOutputBuilder = new SnmpGetOutputBuilder();
-
-        ArrayList<VariableBinding> variableBindings = sendQuery(input);
         for (VariableBinding variableBinding : variableBindings) {
             ResultsBuilder resultsBuilder = new ResultsBuilder();
 
@@ -223,7 +221,9 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
             resultsArrayList.add(resultsBuilder.build());
         }
 
+        SnmpGetOutputBuilder getOutputBuilder = new SnmpGetOutputBuilder();
         getOutputBuilder.setResults(resultsArrayList);
+
         RpcResultBuilder<SnmpGetOutput> rpcResultBuilder = RpcResultBuilder.success();
         rpcResultBuilder.withResult(getOutputBuilder.build());
         return Futures.immediateFuture(rpcResultBuilder.build());
@@ -241,7 +241,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
         String community = input.getCommunity();
         if (community == null) {
-            community = "public";
+            community = DEFAULT_COMMUNITY;
         }
 
         Target target = getTargetForIp(input.getIpAddress(), community);
@@ -253,7 +253,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
                 if (responseEventPDU != null) {
                     int errorStatus = responseEventPDU.getErrorStatus();
                     if (errorStatus != PDU.noError) {
-                        // SET wasn't successfull!
+                        // SET wasn't successful!
 
                         int errorIndex = responseEventPDU.getErrorIndex();
                         String errorString = responseEventPDU.getErrorStatusText();
@@ -288,9 +288,9 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     public Future<RpcResult<GetInterfacesOutput>> getInterfaces(GetInterfacesInput getInterfacesInput) {
 
         GetInterfacesOutputBuilder getInterfacesOutputBuilder = new GetInterfacesOutputBuilder();
-        ArrayList<IfEntryBuilder> ifEntryBuilders = populateMibTable(getInterfacesInput.getIpAddress(), IfEntryBuilder.class, getInterfacesInput.getCommunity());
+        Collection<IfEntryBuilder> ifEntryBuilders = populateMibTable(getInterfacesInput.getIpAddress(), IfEntryBuilder.class, getInterfacesInput.getCommunity());
 
-        ArrayList<IfEntry> ifEntries = new ArrayList<>();
+        ArrayList<IfEntry> ifEntries = new ArrayList<>(ifEntryBuilders.size());
         for (IfEntryBuilder ifEntryBuilder : ifEntryBuilders) {
             ifEntries.add(ifEntryBuilder.build());
         }
@@ -309,6 +309,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 		}
 		if (snmp != null) {
 			snmp.close();
+            snmp = null;
 		}
 	}
 

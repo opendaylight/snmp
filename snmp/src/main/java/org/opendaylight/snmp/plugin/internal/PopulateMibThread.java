@@ -30,17 +30,17 @@ import org.snmp4j.smi.VariableBinding;
 
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 
 public class PopulateMibThread<T> extends Thread {
     private static final Logger LOG = LoggerFactory.getLogger(PopulateMibThread.class);
-    private Method method;
-    private ConcurrentHashMap<Integer, T> indexToBuilderObject;
-    private SnmpGetInputBuilder snmpGetInputBuilder;
-    private Class builderClass;
-    private SNMPImpl snmpImpl;
+    private final Method method;
+    private final ConcurrentHashMap<Integer, T> indexToBuilderObject;
+    private final SnmpGetInputBuilder snmpGetInputBuilder;
+    private final Class<T> builderClass;
+    private final SNMPImpl snmpImpl;
 
     public PopulateMibThread(Method method,
                              ConcurrentHashMap<Integer, T> indexToBuilderObject,
@@ -69,14 +69,14 @@ public class PopulateMibThread<T> extends Thread {
             String oidString = oid.value();
             snmpGetInputBuilder.setOid(oidString);
 
-            org.snmp4j.smi.OID baseOID = new org.snmp4j.smi.OID(oid.value());
+            org.snmp4j.smi.OID baseOID = new org.snmp4j.smi.OID(oidString);
 
             // Send the request for the oid
             Variable variable = null;
             Class objectType = null;
             try {
 
-                ArrayList<VariableBinding> variableBindings = snmpImpl.sendQuery(snmpGetInputBuilder.build());
+                List<VariableBinding> variableBindings = snmpImpl.sendQuery(snmpGetInputBuilder.build());
                 for (VariableBinding variableBinding : variableBindings) {
                     org.snmp4j.smi.OID snmpOID = variableBinding.getOid();
 
@@ -110,10 +110,10 @@ public class PopulateMibThread<T> extends Thread {
                         setObject = new Ipv4Address(ipAddress.toString());
 
                     } else if (objectType.equals(Long.class)) {
-                        setObject = new Long(variable.toLong());
+                        setObject = variable.toLong();
 
                     } else if (objectType.equals(Integer.class)) {
-                        setObject = new Integer(variable.toInt());
+                        setObject = variable.toInt();
 
                     } else if (objectType.equals(InterfaceIndexOrZero.class)) {
                         setObject = new InterfaceIndexOrZero(Integer.valueOf(variable.toString()));
@@ -132,7 +132,7 @@ public class PopulateMibThread<T> extends Thread {
                         setObject = new PhysAddress(variable.toString());
 
                     } else if (objectType.equals(String.class)) {
-                        setObject = new String(variable.toString());
+                        setObject = variable.toString();
 
                     } else if (objectType.equals(Gauge32.class)) {
                         setObject = new Gauge32(variable.toLong());
@@ -151,7 +151,7 @@ public class PopulateMibThread<T> extends Thread {
                     T builderObject;
 
                     if (!indexToBuilderObject.contains(index)) {
-                        builderObject = (T) builderClass.newInstance();
+                        builderObject = builderClass.newInstance();
                         indexToBuilderObject.putIfAbsent(index, builderObject);
                     }
 
