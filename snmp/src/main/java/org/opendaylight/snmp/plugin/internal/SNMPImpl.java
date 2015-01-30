@@ -10,6 +10,7 @@ package org.opendaylight.snmp.plugin.internal;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.base.Preconditions;
 
+import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntryBuilder;
@@ -36,6 +37,7 @@ import org.snmp4j.Snmp;
 import org.snmp4j.Target;
 import org.snmp4j.TransportMapping;
 import org.snmp4j.event.ResponseEvent;
+import org.snmp4j.event.ResponseListener;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.Address;
 import org.snmp4j.smi.Integer32;
@@ -231,13 +233,13 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
     @Override
     public Future<RpcResult<Void>> snmpSet(SnmpSetInput input) {
-        RpcResultBuilder<Void> rpcResultBuilder = RpcResultBuilder.success();
+        final SettableFuture<RpcResult<Void>> future = SettableFuture.create();
+
         PDU pdu = new PDU();
         OID oid = new OID(input.getOid());
         Variable variable = new OctetString(input.getValue());
         pdu.add(new VariableBinding(oid, variable));
         pdu.setType(PDU.SET);
-
 
         String community = input.getCommunity();
         if (community == null) {
@@ -247,41 +249,46 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         Target target = getTargetForIp(input.getIpAddress(), community);
 
         try {
-            ResponseEvent responseEvent = snmp.set(pdu, target);
-            if (responseEvent != null) {
-                PDU responseEventPDU = responseEvent.getResponse();
-                if (responseEventPDU != null) {
-                    int errorStatus = responseEventPDU.getErrorStatus();
-                    if (errorStatus != PDU.noError) {
-                        // SET wasn't successful!
+            snmp.set(pdu, target, null, new ResponseListener() {
+                @Override
+                public void onResponse(ResponseEvent responseEvent) {
+                    RpcResultBuilder<Void> rpcResultBuilder;
+                    PDU responseEventPDU = responseEvent.getResponse();
+                    if (responseEventPDU != null) {
+                        int errorStatus = responseEventPDU.getErrorStatus();
+                        if (errorStatus != PDU.noError) {
+                            // SET wasn't successful!
 
-                        int errorIndex = responseEventPDU.getErrorIndex();
-                        String errorString = responseEventPDU.getErrorStatusText();
+                            int errorIndex = responseEventPDU.getErrorIndex();
+                            String errorString = responseEventPDU.getErrorStatusText();
 
+                            rpcResultBuilder = RpcResultBuilder.failed();
+                            rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
+                                    String.format("SnmpSET failed with error status: %s, error index: %s. StatusText: %s",
+                                            errorStatus, errorIndex, errorString));
+                        }
+                        else {
+                            rpcResultBuilder = RpcResultBuilder.success();
+                        }
+
+                    } else {
+                        // Response Event PDU was null
                         rpcResultBuilder = RpcResultBuilder.failed();
                         rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
-                                String.format("SnmpSET failed with error status: %s, error index: %s. StatusText: %s",
-                                        errorStatus, errorIndex, errorString));
+                                "SNMP set timed out.");
                     }
-                } else {
-                    // Response Event PDU was null
-                    rpcResultBuilder = RpcResultBuilder.failed();
-                    rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
-                            "Response PDU is null.");
+
+                    future.set(rpcResultBuilder.build());
                 }
-            } else {
-                // Response Event was null
-                rpcResultBuilder = RpcResultBuilder.failed();
-                rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
-                        "Response timed out.");
-            }
+            });
         } catch (IOException e) {
             LOG.warn(e.getMessage());
-            rpcResultBuilder = RpcResultBuilder.failed();
+            RpcResultBuilder<Void> rpcResultBuilder = RpcResultBuilder.failed();
             rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION, e.getMessage());
+            future.set(rpcResultBuilder.build());
         }
 
-        return Futures.immediateFuture(rpcResultBuilder.build());
+        return future;
     }
 
     @Override
