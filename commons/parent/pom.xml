@@ -45,6 +45,12 @@
         <salGeneratorPath>target/generated-sources/sal</salGeneratorPath>
 
         <snmp.impl.configfile>snmp-impl.xml</snmp.impl.configfile>
+        <!-- Sonar config -->
+        <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
+        <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+        <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
+        <sonar.profile>Sonar way with Findbugs</sonar.profile>
     </properties>
 
     <build>
@@ -68,43 +74,40 @@
                             </dependency>
                     </dependencies>
                 </plugin>
-
+                <plugin>
+                   <groupId>org.jacoco</groupId>
+                   <artifactId>jacoco-maven-plugin</artifactId>
+                   <executions>
+                     <execution>
+                       <id>prepare-ut-agent</id>
+                       <phase>process-test-classes</phase>
+                       <goals>
+                         <goal>prepare-agent</goal>
+                       </goals>
+                       <configuration>
+                         <destFile>${sonar.jacoco.reportPath}</destFile>
+                       </configuration>
+                     </execution>
+                     <execution>
+                       <id>prepare-it-agent</id>
+                       <phase>pre-integration-test</phase>
+                       <goals>
+                         <goal>prepare-agent</goal>
+                       </goals>
+                       <configuration>
+                         <destFile>${sonar.jacoco.itReportPath}</destFile>
+                       </configuration>
+                     </execution>
+                      <execution>
+                        <id>post-test</id>
+                        <phase>test</phase>
+                        <goals>
+                          <goal>report</goal>
+                        </goals>
+                      </execution>
+                   </executions>
+                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-          <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>prepare-ut-agent</id>
-                <phase>process-test-classes</phase>
-                <goals>
-                  <goal>prepare-agent</goal>
-                </goals>
-                <configuration>
-                  <destFile>${sonar.jacoco.reportPath}</destFile>
-                </configuration>
-              </execution>
-              <execution>
-                <id>prepare-it-agent</id>
-                <phase>pre-integration-test</phase>
-                <goals>
-                  <goal>prepare-agent</goal>
-                </goals>
-                <configuration>
-                  <destFile>${sonar.jacoco.itReportPath}</destFile>
-                </configuration>
-              </execution>
-               <execution>
-                 <id>post-test</id>
-                 <phase>test</phase>
-                 <goals>
-                   <goal>report</goal>
-                 </goals>
-               </execution>
-            </executions>
-          </plugin>
-        </plugins>
     </build>
 </project>
