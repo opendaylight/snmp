@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_71f862c3",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-06T22:33:49Z",
+      "side": 1,
+      "message": "These appear to already be defined in odlparent.",
+      "range": {
+        "startLine": 48,
+        "startChar": 8,
+        "endLine": 52,
+        "endChar": 98
+      },
+      "revId": "0163f9f377dcc89b9ef853810f26b620ec9584e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_3115fae4",
+        "filename": "commons/parent/pom.xml",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-06T22:33:49Z",
+      "side": 1,
+      "message": "If this is common to all projects\u0027 impl, can we add it to yangtools binding-parent? This is the common parent for impls in the new startup archetype, which our projects will eventually migrate to.",
+      "range": {
+        "startLine": 77,
+        "startChar": 16,
+        "endLine": 109,
+        "endChar": 26
+      },
+      "revId": "0163f9f377dcc89b9ef853810f26b620ec9584e7",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
