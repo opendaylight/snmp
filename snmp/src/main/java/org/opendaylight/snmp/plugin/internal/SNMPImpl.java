@@ -35,7 +35,6 @@ import org.snmp4j.CommunityTarget;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
-import org.snmp4j.TransportMapping;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.event.ResponseListener;
 import org.snmp4j.mp.SnmpConstants;
@@ -66,26 +65,41 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     private static final String DEFAULT_COMMUNITY = "public";
     private Snmp snmp;
     private static final Integer snmpListenPort = 161;
-    TransportMapping transport;
+    private static final int RETRIES = 1;
+    private static final int TIMEOUT = 500;
+    private static final int MAXREPETITIONS = 10000; 
     
     private final RpcProviderRegistry rpcProviderRegistery;
     private final BindingAwareBroker.RpcRegistration<SnmpService> rpcRegistration;
 
     public SNMPImpl(RpcProviderRegistry rpcProviderRegistery) {
-    	LOG.debug("SNMPImpl constructor");
-    	this.rpcProviderRegistery = Preconditions.checkNotNull(rpcProviderRegistery);
-    	
-        try {
-            transport = new DefaultUdpTransportMapping();
-            snmp = new Snmp(transport);
-            // Do not forget this line!
-            snmp.listen();
-        } catch (IOException e) {
-            LOG.warn(e.getMessage());
-        }
-        
-        // register this class as teh RPC service
+        this(rpcProviderRegistery, initSnmp());
+    }
+    
+    SNMPImpl(RpcProviderRegistry rpcProviderRegistery, Snmp snmp) {
+        this.rpcProviderRegistery = Preconditions.checkNotNull(rpcProviderRegistery);
+        this.snmp = Preconditions.checkNotNull(snmp);
         this.rpcRegistration = this.rpcProviderRegistery.addRpcImplementation(SnmpService.class, this);
+    }
+    
+    private static Snmp initSnmp() {
+        Snmp snmp = null;
+        try {
+            snmp = new Snmp( new DefaultUdpTransportMapping());
+            snmp.listen();  // Do not forget this line!
+        } catch (IOException e) {
+            LOG.warn("Failed to create Snmp instance", e);
+        }
+        return snmp;
+    }
+    
+    // Used in unit testing
+    Snmp getSnmp() {
+        return snmp;
+    }
+    // Used in unit testing
+    BindingAwareBroker.RpcRegistration<SnmpService> getRpcRegistration() {
+        return rpcRegistration;
     }
 
     private Target getTargetForIp(Ipv4Address address, String community) {
@@ -99,8 +113,8 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         CommunityTarget communityTarget = new CommunityTarget();
         communityTarget.setCommunity(new OctetString(community));
         communityTarget.setAddress(addr);
-        communityTarget.setRetries(1);
-        communityTarget.setTimeout(500);
+        communityTarget.setRetries(RETRIES);
+        communityTarget.setTimeout(TIMEOUT);
         communityTarget.setVersion(SnmpConstants.version2c);
         return communityTarget;
     }
@@ -110,7 +124,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         PDU pdu = new PDU();
         OID oid = new OID(input.getOid());
         pdu.add(new VariableBinding(oid));
-        pdu.setMaxRepetitions(10000);
+        pdu.setMaxRepetitions(MAXREPETITIONS);
         pdu.setNonRepeaters(0);
         ArrayList<VariableBinding> variableBindings = new ArrayList<>();
 
@@ -253,7 +267,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
                 @Override
                 public void onResponse(ResponseEvent responseEvent) {
                     // JavaDocs state not doing the following will cause a leak
-                    ((Snmp)responseEvent.getSource()).cancel(responseEvent.getRequest(), this);
+                       ((Snmp)responseEvent.getSource()).cancel(responseEvent.getRequest(), this);
 
                     RpcResultBuilder<Void> rpcResultBuilder;
                     PDU responseEventPDU = responseEvent.getResponse();
@@ -312,15 +326,15 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         return Futures.immediateFuture(rpcResultBuilder.build());
     }
 
-	@Override
-	public void close() throws Exception {
-		if(rpcRegistration != null) {
-			rpcRegistration.close();
-		}
-		if (snmp != null) {
-			snmp.close();
+    @Override
+    public void close() throws Exception {
+        if(rpcRegistration != null) {
+            rpcRegistration.close();
+        }
+        if (snmp != null) {
+            snmp.close();
             snmp = null;
-		}
-	}
+        }
+    }
 
 }
