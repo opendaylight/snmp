@@ -71,15 +71,20 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     private final RpcProviderRegistry rpcProviderRegistery;
     private final BindingAwareBroker.RpcRegistration<SnmpService> rpcRegistration;
 
-    public SNMPImpl(RpcProviderRegistry rpcProviderRegistery) {
+    public SNMPImpl(RpcProviderRegistry rpcProviderRegistery, Snmp snmp) {
     	LOG.debug("SNMPImpl constructor");
     	this.rpcProviderRegistery = Preconditions.checkNotNull(rpcProviderRegistery);
     	
         try {
             transport = new DefaultUdpTransportMapping();
-            snmp = new Snmp(transport);
-            // Do not forget this line!
-            snmp.listen();
+            if (snmp != null) {
+            	this.snmp = snmp;
+            }
+            else {
+            	snmp = new Snmp(transport);
+            	// Do not forget this line!
+            	snmp.listen();
+            }
         } catch (IOException e) {
             LOG.warn(e.getMessage());
         }
@@ -253,7 +258,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
                 @Override
                 public void onResponse(ResponseEvent responseEvent) {
                     // JavaDocs state not doing the following will cause a leak
-                    ((Snmp)responseEvent.getSource()).cancel(responseEvent.getRequest(), this);
+               	    ((Snmp)responseEvent.getSource()).cancel(responseEvent.getRequest(), this);
 
                     RpcResultBuilder<Void> rpcResultBuilder;
                     PDU responseEventPDU = responseEvent.getResponse();
