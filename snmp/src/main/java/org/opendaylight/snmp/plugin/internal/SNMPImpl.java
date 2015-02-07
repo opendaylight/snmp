@@ -71,6 +71,9 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     private final RpcProviderRegistry rpcProviderRegistery;
     private final BindingAwareBroker.RpcRegistration<SnmpService> rpcRegistration;
 
+    /*
+     * Constructor
+     */
     public SNMPImpl(RpcProviderRegistry rpcProviderRegistery) {
     	LOG.debug("SNMPImpl constructor");
     	this.rpcProviderRegistery = Preconditions.checkNotNull(rpcProviderRegistery);
@@ -86,6 +89,30 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         
         // register this class as teh RPC service
         this.rpcRegistration = this.rpcProviderRegistery.addRpcImplementation(SnmpService.class, this);
+    }
+    
+    /*
+     * Constructor for unit test
+     */
+    public SNMPImpl(RpcProviderRegistry rpcProviderRegistery, Snmp snmp) {
+    	LOG.debug("SNMPImpl unit test constructor");
+    	this.rpcProviderRegistery = Preconditions.checkNotNull(rpcProviderRegistery);
+    	this.snmp = snmp;
+        // register this class as teh RPC service
+        this.rpcRegistration = this.rpcProviderRegistery.addRpcImplementation(SnmpService.class, this);
+    }
+    
+    /* 
+     * Used in unit testing
+     */
+    protected Snmp getSnmp() {
+    	return snmp;
+    }
+    /*
+     * Used in unit testing
+     */
+    protected BindingAwareBroker.RpcRegistration<SnmpService> getRpcRegistration() {
+    	return rpcRegistration;
     }
 
     private Target getTargetForIp(Ipv4Address address, String community) {
@@ -253,7 +280,10 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
                 @Override
                 public void onResponse(ResponseEvent responseEvent) {
                     // JavaDocs state not doing the following will cause a leak
-                    ((Snmp)responseEvent.getSource()).cancel(responseEvent.getRequest(), this);
+                	String sourceName = (responseEvent.getSource()).getClass().getName();
+                    if (responseEvent.getSource() != null && !sourceName.equals("java.lang.Object")) {
+                	    ((Snmp)responseEvent.getSource()).cancel(responseEvent.getRequest(), this);
+                	}
 
                     RpcResultBuilder<Void> rpcResultBuilder;
                     PDU responseEventPDU = responseEvent.getResponse();
