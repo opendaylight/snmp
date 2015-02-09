@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_a8c8b7a8",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-09T23:28:28Z",
+      "side": 1,
+      "message": "I would rather not introduce a separate constructor. If we do then one should chain to the other. It might be better to instead use this constructor and have the Module create and pass in the snmp instance. Optionally, you could have a default instance created if the argument passed in is null.",
+      "revId": "3c492babed42c6faca1f399c26d214ef933a8d7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_48e25330",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-09T23:28:28Z",
+      "side": 1,
+      "message": "If we injected this, we shouldn\u0027t need an accessor.",
+      "revId": "3c492babed42c6faca1f399c26d214ef933a8d7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_08d8cb79",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-09T23:28:28Z",
+      "side": 1,
+      "message": "I don\u0027t think we need to have an accessor for this either. A better test might be to call close() and ensure that the mocked registration is closed.",
+      "revId": "3c492babed42c6faca1f399c26d214ef933a8d7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_c8cd03b9",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-09T23:28:28Z",
+      "side": 1,
+      "message": "This looks very test specific. I wouldn\u0027t change impl code just to work around a test issue. Can we find another way to do this?",
+      "revId": "3c492babed42c6faca1f399c26d214ef933a8d7b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
