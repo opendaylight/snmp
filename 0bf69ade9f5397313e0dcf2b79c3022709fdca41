@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "7a96c907_f839aea4",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 3285
+      },
+      "writtenOn": "2015-02-11T15:13:12Z",
+      "side": 1,
+      "message": "This seems like it\u0027s only required for the UTs. I would change this one to be package-local (so the UT can still use it), but add back \"public SNMPImpl(RpcProviderRegistry rpcP)\". That way other plugins aren\u0027t exposed to our Snmp backend.",
+      "revId": "0bf69ade9f5397313e0dcf2b79c3022709fdca41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a96c907_1597833c",
         "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
         "patchSetId": 2
