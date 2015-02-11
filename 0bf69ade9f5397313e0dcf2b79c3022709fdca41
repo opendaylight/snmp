@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_1597833c",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-11T06:00:15Z",
+      "side": 1,
+      "message": "the try/catch is only valid for the else stmt.",
+      "revId": "0bf69ade9f5397313e0dcf2b79c3022709fdca41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_f591b747",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-11T06:00:15Z",
+      "side": 1,
+      "message": "This can also be moved to the else stmt.",
+      "revId": "0bf69ade9f5397313e0dcf2b79c3022709fdca41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_b597af39",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-11T06:00:15Z",
+      "side": 1,
+      "message": "I would assert more than just the response. I\u0027m assuming there is a way to expect certain input... ip, community, OID, etc. Also, I would not test using \u0027public\u0027, but something than the default.",
+      "revId": "0bf69ade9f5397313e0dcf2b79c3022709fdca41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_d59cbb5f",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-11T06:00:15Z",
+      "side": 1,
+      "message": "Again I would also assert all inputs were as expected.",
+      "revId": "0bf69ade9f5397313e0dcf2b79c3022709fdca41",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
