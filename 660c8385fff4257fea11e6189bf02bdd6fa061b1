@@ -1,0 +1,244 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a96c907_4e67b8b7",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "I thought these were already removed.",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 102,
+        "endChar": 31
+      },
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ae0d1cea",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "Remove extra whitespace.",
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_4efed8af",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "I don\u0027t think this is necessary. I\u0027d rather not expose new getters just for a constructor unit test. There should be other ways to test that the constructor did what was expected. For the rpc registration, you can add a close() test and ensure the registration and snmp are closed.",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 74,
+        "endChar": 5
+      },
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ee2ec442",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "I would define a local pdu variable instead of casting on each line. Likely compiles to the same thing, but would make it easier to read.",
+      "range": {
+        "startLine": 89,
+        "startChar": 34,
+        "endLine": 89,
+        "endChar": 47
+      },
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_0e345091",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "Make local variable.",
+      "range": {
+        "startLine": 99,
+        "startChar": 39,
+        "endLine": 99,
+        "endChar": 54
+      },
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_6e22b453",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "If these are unexpected, then we shouldn\u0027t catch them. Just declare in the throws and let the test fail.",
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ae243c60",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "Make local variable.",
+      "range": {
+        "startLine": 160,
+        "startChar": 34,
+        "endLine": 160,
+        "endChar": 47
+      },
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_ce298838",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "Make local variable.",
+      "range": {
+        "startLine": 170,
+        "startChar": 38,
+        "endLine": 170,
+        "endChar": 54
+      },
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8e1f0008",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "If these are unexpected, then we shouldn\u0027t catch them. Just declare in the throws and let the test fail.",
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_8ef860c4",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "use existing constant?",
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2e182c1d",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "If this is unexpected, then we shouldn\u0027t catch. Just declare in the throws and let the test fail.",
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a96c907_2e010caf",
+        "filename": "snmp/src/test/java/org/opendaylight/snmp/plugin/internal/SNMPImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 2527
+      },
+      "writtenOn": "2015-02-12T04:02:51Z",
+      "side": 1,
+      "message": "This can be null.",
+      "revId": "660c8385fff4257fea11e6189bf02bdd6fa061b1",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
