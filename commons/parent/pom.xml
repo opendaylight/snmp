@@ -51,7 +51,20 @@
         <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.profile>Sonar way with Findbugs</sonar.profile>
+        <features.test.version>1.5.0-SNAPSHOT</features.test.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Test Stuff -->
+            <dependency>
+               <groupId>org.opendaylight.odlparent</groupId>
+               <artifactId>features-test</artifactId>
+               <version>${features.test.version}</version>
+               <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>

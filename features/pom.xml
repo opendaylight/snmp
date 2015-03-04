@@ -21,35 +21,17 @@
 
   <properties>
     <features.file>features.xml</features.file>
-    <feature.test.version>${yangtools.version}</feature.test.version>
     <karaf.empty.version>${controller.version}</karaf.empty.version>
     <surefire.version>${maven.surefire.version}</surefire.version>
     <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
   </properties>
 
   <dependencies>
-    <!-- features -->
-    <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
-      <artifactId>features-yangtools</artifactId>
-      <version>${yangtools.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opendaylight.controller</groupId>
-      <artifactId>features-mdsal</artifactId>
-      <version>${mdsal.version}</version>
-      <classifier>features</classifier>
-      <type>xml</type>
-    </dependency>
-
     <!-- test to validate features.xml -->
     <dependency>
-      <groupId>org.opendaylight.yangtools</groupId>
+      <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>features-test</artifactId>
-      <version>${feature.test.version}</version>
+      <version>${features.test.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -132,7 +114,7 @@
              <karaf.distro.version>${karaf.empty.version}</karaf.distro.version>
            </systemPropertyVariables>
            <dependenciesToScan>
-            <dependency>org.opendaylight.yangtools:features-test</dependency>
+            <dependency>org.opendaylight.odlparent:features-test</dependency>
            </dependenciesToScan>
          </configuration>
        </plugin>
