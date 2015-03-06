@@ -7,10 +7,11 @@
  */
 package org.opendaylight.snmp.plugin.internal;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.common.base.Preconditions;
-
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.SettableFuture;
+import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
+import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntryBuilder;
@@ -56,9 +57,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
-
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 
 public class SNMPImpl implements SnmpService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SNMPImpl.class);
@@ -177,6 +175,135 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         return variableBindings;
     }
 
+    private class AsyncGetHandler implements ResponseListener {
+
+        private SnmpGetInput snmpGetInput;
+        private SettableFuture<RpcResult<SnmpGetOutput>> output;
+        private List<VariableBinding> variableBindings;
+        private Target target;
+        private PDU pdu;
+        private OID oid;
+
+        public AsyncGetHandler(SnmpGetInput getInput) {
+            snmpGetInput = getInput;
+
+            pdu = new PDU();
+            oid = new OID(snmpGetInput.getOid());
+            pdu.add(new VariableBinding(oid));
+            pdu.setMaxRepetitions(MAXREPETITIONS);
+            pdu.setNonRepeaters(0);
+            variableBindings = new ArrayList<>();
+
+            String community = getInput.getCommunity();
+            if (community == null) community = DEFAULT_COMMUNITY;
+
+            target = getTargetForIp(getInput.getIpAddress(), community);
+
+            if (snmpGetInput.getGetType().equals(SnmpGetType.GET)) {
+                pdu.setType(PDU.GET);
+            } else if (snmpGetInput.getGetType().equals(SnmpGetType.GETNEXT)) {
+                pdu.setType(PDU.GETNEXT);
+            } else {
+                pdu.setType(PDU.GETBULK);
+            }
+        }
+
+        @Override
+        public void onResponse(ResponseEvent responseEvent) {
+            try {
+                boolean stop = false;
+                PDU response = responseEvent.getResponse();
+                VariableBinding lastBinding = null;
+                if (response != null) {
+                    for (VariableBinding binding : response.getVariableBindings()) {
+                        lastBinding = binding;
+                        if (binding.getOid() == null ||
+                                binding.getOid().size() < oid.size() ||
+                                oid.leftMostCompare(oid.size(), binding.getOid()) != 0 ||
+                                binding.getOid().compareTo(oid) < 0) {
+
+                            stop = true;
+                            break;
+                        } else {
+                            variableBindings.add(binding);
+                        }
+                    }
+                    if (!snmpGetInput.getGetType().equals(SnmpGetType.GETWALK)) {
+                        stop = true;
+                    }
+                    if (response.getErrorStatus() != PDU.noError) {
+                        LOG.info("Error: " + response.getErrorStatusText());
+                        stop = true;
+                    }
+                } else {
+                    LOG.debug("Response was null");
+                    stop = true;
+                }
+
+                LOG.debug(String.format("Stop: %s", stop));
+
+                if (!stop && (lastBinding != null)) {
+                    pdu.setRequestID(new Integer32(0));
+                    pdu.set(0, lastBinding);
+                    sendRequest();
+                } else {
+                    setResult();
+                }
+
+
+            } catch (Exception e) {
+                LOG.info(e.getMessage());
+            }
+
+        }
+
+        private void setResult() {
+            LOG.debug("Setting result");
+            ArrayList<Results> resultsArrayList = new ArrayList<>(variableBindings.size());
+
+            for (VariableBinding variableBinding : variableBindings) {
+                ResultsBuilder resultsBuilder = new ResultsBuilder();
+
+                String oid = variableBinding.getOid().toString();
+                String val = variableBinding.getVariable().toString();
+
+                resultsBuilder.setOid(oid).setValue(val);
+                resultsArrayList.add(resultsBuilder.build());
+            }
+
+            SnmpGetOutputBuilder getOutputBuilder = new SnmpGetOutputBuilder();
+            getOutputBuilder.setResults(resultsArrayList);
+
+            RpcResultBuilder<SnmpGetOutput> rpcResultBuilder = RpcResultBuilder.success();
+            rpcResultBuilder.withResult(getOutputBuilder.build());
+
+            output.set(rpcResultBuilder.build());
+        }
+
+        private void sendRequest() throws IOException {
+            snmp.send(pdu, target, null, this);
+        }
+
+        public SettableFuture<RpcResult<SnmpGetOutput>> getResponse() {
+            output = SettableFuture.create();
+            // Run the get code;
+            PDU pdu = new PDU();
+            OID oid = new OID(snmpGetInput.getOid());
+            pdu.add(new VariableBinding(oid));
+            pdu.setMaxRepetitions(MAXREPETITIONS);
+            pdu.setNonRepeaters(0);
+            try {
+                sendRequest();
+            } catch (IOException e) {
+                RpcResultBuilder<SnmpGetOutput> errorOutput = RpcResultBuilder.failed();
+                errorOutput.withError(RpcError.ErrorType.APPLICATION, "IOException when sending GET request");
+                output.set(errorOutput.build());
+            }
+
+            return output;
+        }
+    }
+
     public <T> Collection<T> populateMibTable(Ipv4Address address, Class<T> builderClass) {
         return populateMibTable(address, builderClass, DEFAULT_COMMUNITY);
     }
@@ -214,26 +341,8 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     @Override
     public Future<RpcResult<SnmpGetOutput>> snmpGet(SnmpGetInput input) {
         LOG.info("Sending " + input.getGetType() + " SNMP request for host: " + input.getIpAddress() + " for OID: " + input.getOid() + " Community: " + input.getCommunity());
-
-        List<VariableBinding> variableBindings = sendQuery(input);
-        ArrayList<Results> resultsArrayList = new ArrayList<>(variableBindings.size());
-
-        for (VariableBinding variableBinding : variableBindings) {
-            ResultsBuilder resultsBuilder = new ResultsBuilder();
-
-            String oid = variableBinding.getOid().toString();
-            String val = variableBinding.getVariable().toString();
-
-            resultsBuilder.setOid(oid).setValue(val);
-            resultsArrayList.add(resultsBuilder.build());
-        }
-
-        SnmpGetOutputBuilder getOutputBuilder = new SnmpGetOutputBuilder();
-        getOutputBuilder.setResults(resultsArrayList);
-
-        RpcResultBuilder<SnmpGetOutput> rpcResultBuilder = RpcResultBuilder.success();
-        rpcResultBuilder.withResult(getOutputBuilder.build());
-        return Futures.immediateFuture(rpcResultBuilder.build());
+        AsyncGetHandler getHandler = new AsyncGetHandler(input);
+        return getHandler.getResponse();
     }
 
     @Override
