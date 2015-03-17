@@ -1,8 +1,5 @@
 package org.opendaylight.snmp.plugin.internal;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -18,10 +15,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.Results;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.snmp4j.PDU;
+import org.snmp4j.Snmp;
+import org.snmp4j.Target;
 import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.event.ResponseListener;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.Address;
+import org.snmp4j.smi.OID;
+import org.snmp4j.smi.OctetString;
+import org.snmp4j.smi.UdpAddress;
+import org.snmp4j.smi.Variable;
+import org.snmp4j.smi.VariableBinding;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -30,13 +34,14 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.snmp4j.Snmp;
-import org.snmp4j.smi.OctetString;
-import org.snmp4j.smi.UdpAddress;
-import org.snmp4j.smi.OID;
-import org.snmp4j.smi.Variable;
-import org.snmp4j.smi.VariableBinding;
-import org.snmp4j.Target;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 public class SNMPImplTest {
@@ -74,7 +79,13 @@ public class SNMPImplTest {
         // will return event. Use argThat to provide custom matchers.  In the
         // matchers we check that the parameters passed to snmp.send are as
         // expected
-        when(mockSnmp.send(argThat(new ArgumentMatcher<PDU>(){
+        doAnswer(new Answer<Object>() {
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
+                callback.onResponse(event);
+                return null;
+            }
+        }).when(mockSnmp).send(argThat(new ArgumentMatcher<PDU>(){
             @Override
             public boolean matches(Object argument) {
                 if (argument instanceof PDU) {
@@ -98,7 +109,7 @@ public class SNMPImplTest {
                         return true;
                     }
                     return false;
-                }}))).thenReturn(event);
+                }}),  any(), (ResponseListener) any());
 
         SNMPImpl snmpImpl = new SNMPImpl(mockRpcReg, mockSnmp);
 
