@@ -13,7 +13,7 @@
       <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>odlparent</artifactId>
       <version>1.5.0-SNAPSHOT</version>
-      <relativePath>../../../odlparent/odlparent</relativePath>
+      <relativePath/>
   </parent>
 
     <groupId>org.opendaylight.snmp</groupId>
@@ -22,24 +22,12 @@
     <packaging>pom</packaging>
 
     <properties>
-        <!-- Use these properties when building to run on a Helium release -->
-        <!--
-        <yangtools.version>0.6.2-Helium</yangtools.version>
-        <ietf-yang-types.version>2010.09.24.4-Helium</ietf-yang-types.version>
-        <ietf-inet-types.version>2010.09.24.3</ietf-inet-types.version>
-        <controller.version>1.4.2-Helium</controller.version>
-        <mdsal.version>1.1-Helium</mdsal.version>
-        <config.version>0.2.5-Helium</config.version>
-        -->
-
-        <!-- Use these properties when building to run on the latest code (SNAPSHOT)  -->
         <yangtools.version>0.7.0-SNAPSHOT</yangtools.version>
         <ietf-yang-types.version>2010.09.24.7-SNAPSHOT</ietf-yang-types.version>
         <ietf-inet-types.version>2010.09.24.7-SNAPSHOT</ietf-inet-types.version>
         <controller.version>1.5.0-SNAPSHOT</controller.version>
         <mdsal.version>1.2.0-SNAPSHOT</mdsal.version>
         <config.version>0.3.0-SNAPSHOT</config.version>
-
         <apache.servicemix.version>2.3.1_1</apache.servicemix.version>
 
         <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
