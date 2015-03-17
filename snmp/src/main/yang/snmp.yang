@@ -39,6 +39,9 @@ module snmp {
             enum GET-NEXT {
                 value "3";
             }
+            enum GET-WALK {
+                value "4";
+            }
         }
     }
 
