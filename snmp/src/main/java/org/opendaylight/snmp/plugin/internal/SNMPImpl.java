@@ -12,7 +12,6 @@ import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
-import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.InterfaceIndex;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesInput;
@@ -39,6 +38,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -46,7 +46,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SNMPImpl.class);
     static final String DEFAULT_COMMUNITY = "public";
     private Snmp snmp;
-    static final Integer snmpListenPort = 161;
+    static final Integer SNMP_LISTEN_PORT = 161;
     static final int RETRIES = 1;
     static final int TIMEOUT = 500;
     static final int MAXREPETITIONS = 10000;
@@ -78,9 +78,10 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     static Target getTargetForIp(Ipv4Address address, String community) {
         Address addr = null;
         try {
-            addr = new UdpAddress(Inet4Address.getByName(address.getValue()), snmpListenPort);
+            addr = new UdpAddress(Inet4Address.getByName(address.getValue()), SNMP_LISTEN_PORT);
         } catch (UnknownHostException e) {
-            LOG.warn(e.getMessage());
+            LOG.warn("Failed to create UDP Address", e);
+            return null;
         }
 
         CommunityTarget communityTarget = new CommunityTarget();
@@ -119,10 +120,9 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
                 Map<Integer, IfEntryBuilder> ifEntryBuilders = ifEntryBuilderMibTable.populate();
 
-                ArrayList<IfEntry> ifEntries = new ArrayList<>(ifEntryBuilders.size());
+                List<IfEntry> ifEntries = new ArrayList<>(ifEntryBuilders.size());
                 for (Integer index : ifEntryBuilders.keySet()) {
                     IfEntryBuilder ifEntryBuilder = ifEntryBuilders.get(index);
-                    ifEntryBuilder.setIfIndex(new InterfaceIndex(index));
                     ifEntries.add(ifEntryBuilder.build());
                 }
 

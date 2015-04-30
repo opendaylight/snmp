@@ -1,12 +1,18 @@
 package org.opendaylight.snmp.plugin.internal;
 
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev100924.Counter32;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.InterfaceIndex;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntry;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntryBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
@@ -14,6 +20,8 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.Results;
 import org.opendaylight.yangtools.yang.common.RpcResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
@@ -21,6 +29,7 @@ import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.event.ResponseListener;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.Address;
+import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UdpAddress;
@@ -30,6 +39,7 @@ import org.snmp4j.smi.VariableBinding;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -45,6 +55,7 @@ import static org.mockito.Mockito.when;
 
 
 public class SNMPImplTest {
+    private static final Logger LOG = LoggerFactory.getLogger(SNMPImplTest.class);
 
     private static final String SYS_OID_REQUEST = "1.3.6.1.2.1.1.2.0";
     private static final String SYS_OID_RESPONSE = "1.3.6.1.4.1.11.2.3.7.11.119";
@@ -61,8 +72,8 @@ public class SNMPImplTest {
     private static Snmp mockSnmp = null;
     private static RpcProviderRegistry mockRpcReg = null;
 
-    @BeforeClass
-    public static void setUpTest() throws IOException {
+    @Before
+    public void setUp() throws IOException {
         mockRpcReg = mock(RpcProviderRegistry.class);
         when(mockRpcReg.addRpcImplementation(eq(SnmpService.class), any(SnmpService.class))).thenReturn(null);
 
@@ -90,9 +101,9 @@ public class SNMPImplTest {
             public boolean matches(Object argument) {
                 if (argument instanceof PDU) {
                     PDU pdu = (PDU)argument;
-                    assertEquals(pdu.getType(), PDU.GET);
-                    assertEquals(pdu.getVariableBindings().get(0).getOid().toString(), SYS_OID_REQUEST);
-                    assertEquals(pdu.getMaxRepetitions(), MAXREPETITIONS);
+                    assertEquals("Checking PDU Get type", pdu.getType(), PDU.GET);
+                    assertEquals("Checking PDU OID value", pdu.getVariableBindings().get(0).getOid().toString(), SYS_OID_REQUEST);
+                    assertEquals("Checking max repititions", pdu.getMaxRepetitions(), MAXREPETITIONS);
                     return true;
                 }
                 return false;
@@ -154,7 +165,7 @@ public class SNMPImplTest {
                 callback.onResponse(event);
                 return null;
             }
-        }).when(mockSnmp).set(argThat(new ArgumentMatcher<PDU>(){
+        }).when(mockSnmp).set(argThat(new ArgumentMatcher<PDU>() {
             @Override
             public boolean matches(Object argument) {
                 if (argument instanceof PDU) {
@@ -231,4 +242,93 @@ public class SNMPImplTest {
         return responseEvent;
     }
 
+    @Test
+    public void testGetInterfaces() throws Exception {
+        final String baseIFOIB = "1.3.6.1.2.1.2.2.1.";
+        final OID ifIndexOID = new OID(baseIFOIB + "1");
+        final OID ifAdminStatusOID = new OID(baseIFOIB + "7");
+        final OID ifDescrOID = new OID(baseIFOIB + "2");
+        final OID ifInErrorsOID = new OID(baseIFOIB + "14");
+
+
+        // Generate the test list of interfaces
+        final List<IfEntry> testInterfaceEntries = new ArrayList<>();
+
+        for (int i=0; i<10; i++) {
+            IfEntryBuilder ifEntryBuilder = new IfEntryBuilder()
+                    .setIfIndex(new InterfaceIndex(i + 1))
+                    .setIfAdminStatus(IfEntry.IfAdminStatus.forValue(i % 3))
+                    .setIfDescr(String.format("Interface %s", i))
+                    .setIfInErrors(new Counter32(99l-i));
+            testInterfaceEntries.add(ifEntryBuilder.build());
+        }
+
+        // Set up the response for the mock snmp4j
+        // This is responsible for calling the onResponse() callback for SNMP messages
+        doAnswer(new Answer<Object>() {
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                PDU requestPDU = (PDU) invocation.getArguments()[0];
+                ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
+
+                // Create the response PDU based on the request PDU
+                PDU responsePDU = new PDU();
+                responsePDU.setType(PDU.GET);
+
+                // Get the OID of the request
+                assertEquals("Checking size of PDU response variable bindings", 1, requestPDU.getVariableBindings().size());
+                OID requestOID = requestPDU.getVariableBindings().get(0).getOid();
+
+                for (int i=0; i<testInterfaceEntries.size(); i++) {
+                    IfEntry testIfEntry = testInterfaceEntries.get(i);
+                    int[] prefix = requestOID.getValue();
+                    Variable val = null;
+
+                    if (requestOID.equals(ifIndexOID)) {
+                        // Add all of the ifIndexes to the response
+                        val = new Integer32(i + 1);
+
+                    } else if (requestOID.equals(ifAdminStatusOID)) {
+                        val = new Integer32(i % 3);
+
+                    } else if (requestOID.equals(ifDescrOID)) {
+                        val = new OctetString(testIfEntry.getIfDescr());
+
+                    } else if (requestOID.equals(ifInErrorsOID)) {
+                        val = new org.snmp4j.smi.Counter32(testIfEntry.getIfInErrors().getValue());
+
+                    } else {
+                        // Don't add any variable bindings to the response
+                        break;
+                    }
+
+                    if (val != null) {
+                        OID objOID = new OID(prefix, i);
+                        responsePDU.add(new VariableBinding(objOID, val));
+                    }
+                }
+
+                ResponseEvent responseEvent = new ResponseEvent(mockRpcReg,
+                        new UdpAddress(Inet4Address.getByName(GET_IP_ADDRESS), snmpListenPort),
+                        requestPDU,
+                        responsePDU,
+                        null,
+                        null);
+
+                callback.onResponse(responseEvent);
+                return null;
+            }
+        }).when(mockSnmp).send(any(PDU.class), any(Target.class), any(), (ResponseListener) any());
+
+        SNMPImpl snmpImpl = new SNMPImpl(mockRpcReg, mockSnmp);
+
+        Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
+        GetInterfacesInputBuilder input = new GetInterfacesInputBuilder();
+        input.setCommunity(COMMUNITY);
+        input.setIpAddress(ip);
+
+        RpcResult<GetInterfacesOutput> result = null;
+        Future<RpcResult<GetInterfacesOutput>> resultFuture = snmpImpl.getInterfaces(input.build());
+        result = resultFuture.get();
+        assertTrue(result.isSuccessful());
+    }
 }
