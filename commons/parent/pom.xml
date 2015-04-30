@@ -102,7 +102,7 @@
             </plugins>
             </pluginManagement>
         <plugins>
-                <plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
@@ -110,6 +110,9 @@
                     <includes>
                         <include>org.opendaylight.snmp.*</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/*HelpMojo.*</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -126,7 +129,7 @@
                         <phase>test</phase>
                     </execution>
                 </executions>
-                </plugin>
-            </plugins>
+            </plugin>
+        </plugins>
     </build>
 </project>
