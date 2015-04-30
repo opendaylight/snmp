@@ -159,9 +159,9 @@ public class SNMPImplTest {
             public boolean matches(Object argument) {
                 if (argument instanceof PDU) {
                     PDU pdu = (PDU)argument;
-                    assertEquals(pdu.getType(), PDU.SET);
-                    assertEquals(pdu.getVariableBindings().get(0).toValueString(), VALUE);
-                    assertEquals(pdu.getVariableBindings().get(0).getOid().toString(), LOCATION_OID);
+                    assertEquals("Checking SET PDU type", pdu.getType(), PDU.SET);
+                    assertEquals("Checking Value of SET", pdu.getVariableBindings().get(0).toValueString(), VALUE);
+                    assertEquals("Checking OID of SET", pdu.getVariableBindings().get(0).getOid().toString(), LOCATION_OID);
                     return true;
                 }
                 return false;
@@ -170,11 +170,11 @@ public class SNMPImplTest {
                 public boolean matches(Object argument) {
                     if (argument instanceof Target) {
                         Target target = (Target)argument;
-                        assertEquals(target.getSecurityName().toString(), COMMUNITY);
-                        assertEquals(target.getAddress().toString(), (SET_IP_ADDRESS + "/" + snmpListenPort.toString()));
-                        assertEquals(target.getTimeout(), TIMEOUT);
-                        assertEquals(target.getRetries(), RETRIES);
-                        assertEquals(target.getVersion(), SnmpConstants.version2c);
+                        assertEquals("Checking community of SET", target.getSecurityName().toString(), COMMUNITY);
+                        assertEquals("Checking target IP", target.getAddress().toString(), (SET_IP_ADDRESS + "/" + snmpListenPort.toString()));
+                        assertEquals("Checking timeout", target.getTimeout(), TIMEOUT);
+                        assertEquals("Checking retries", target.getRetries(), RETRIES);
+                        assertEquals("Checking version", target.getVersion(), SnmpConstants.version2c);
                         return true;
                     }
                     return false;

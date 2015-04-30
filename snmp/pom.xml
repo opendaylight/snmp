@@ -18,6 +18,26 @@
     </parent>
     <artifactId>snmp</artifactId>
     <packaging>bundle</packaging>
+    <description>The SNMP Project of OpenDaylight addresses the need for a southbound plugin that allows applications and controller services to interact with devices using SNMP. The SNMP southbound plugin will allow applications acting as an SNMP Manager to interact with devices that support an SNMP agent.</description>
+    <url>https://wiki.opendaylight.org/view/SNMP_Plugin:Main</url>
+    <licenses>
+        <license>
+            <name>Eclipse Public License v1.0</name>
+            <url>http://www.eclipse.org/legal/epl-v10.html</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Adam Dierkens</name>
+            <email>adierken@cisco.com</email>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git:ssh://git.opendaylight.org:29418/snmp.git</connection>
+        <developerConnection>scm:git:ssh://git.opendaylight.org:29418/snmp.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://wiki.opendaylight.org/view/SNMP_Plugin:Main</url>
+    </scm>
 
     <build>
         <plugins>
