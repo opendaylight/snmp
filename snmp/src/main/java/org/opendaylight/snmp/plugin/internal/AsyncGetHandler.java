@@ -59,7 +59,9 @@ public class AsyncGetHandler implements ResponseListener {
         variableBindings = new ArrayList<>();
 
         String community = getInput.getCommunity();
-        if (community == null) community = DEFAULT_COMMUNITY;
+        if (community == null) {
+            community = DEFAULT_COMMUNITY;
+        }
 
         target = SNMPImpl.getTargetForIp(getInput.getIpAddress(), community);
 
@@ -104,8 +106,6 @@ public class AsyncGetHandler implements ResponseListener {
                 stop = true;
             }
 
-            LOG.debug(String.format("Stop: %s", stop));
-
             if (!stop && (lastBinding != null)) {
                 pdu.setRequestID(new Integer32(0));
                 pdu.set(0, lastBinding);
@@ -116,22 +116,22 @@ public class AsyncGetHandler implements ResponseListener {
 
 
         } catch (Exception e) {
-            LOG.info(e.getMessage());
+            LOG.warn("Error parsing response", e);
         }
 
     }
 
     private void setResult() {
         LOG.debug("Setting result");
-        ArrayList<Results> resultsArrayList = new ArrayList<>(variableBindings.size());
+        List<Results> resultsArrayList = new ArrayList<>(variableBindings.size());
 
         for (VariableBinding variableBinding : variableBindings) {
             ResultsBuilder resultsBuilder = new ResultsBuilder();
 
-            String oid = variableBinding.getOid().toString();
+            String oidString = variableBinding.getOid().toString();
             String val = variableBinding.getVariable().toString();
 
-            resultsBuilder.setOid(oid).setValue(val);
+            resultsBuilder.setOid(oidString).setValue(val);
             resultsArrayList.add(resultsBuilder.build());
         }
 
@@ -151,15 +151,11 @@ public class AsyncGetHandler implements ResponseListener {
 
     public SettableFuture<RpcResult<SnmpGetOutput>> getRpcResponse() {
         rpcSettableFuture = SettableFuture.create();
-        // Run the get code;
-        PDU pdu = new PDU();
-        OID oid = new OID(snmpGetInput.getOid());
-        pdu.add(new VariableBinding(oid));
-        pdu.setMaxRepetitions(MAXREPETITIONS);
-        pdu.setNonRepeaters(0);
+
         try {
             sendRequest();
         } catch (IOException e) {
+            LOG.warn("Exception when sending GET request", e);
             RpcResultBuilder<SnmpGetOutput> errorOutput = RpcResultBuilder.failed();
             errorOutput.withError(RpcError.ErrorType.APPLICATION, "IOException when sending GET request");
             rpcSettableFuture.set(errorOutput.build());
