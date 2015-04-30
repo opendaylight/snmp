@@ -39,9 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-/**
- * Created by mininet on 3/17/15.
- */
 public class MibTable<T> {
     private static final Logger LOG = LoggerFactory.getLogger(MibTable.class);
 
