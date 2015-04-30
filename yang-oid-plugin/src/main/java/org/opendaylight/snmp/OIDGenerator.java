@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,10 +44,10 @@ public class OIDGenerator extends AbstractMojo {
     @Parameter( defaultValue = "${project.build.directory}/../src/main/java/org/opendaylight/snmp/OID.java", property = "oidClassDir", required = true)
     private File oidClassFile;
 
-    private static Log LOG;
-    private HashMap<String, String> nameToOIDHashMap;
+    private static Log log;
+    private Map<String, String> nameToOIDHashMap;
     private static final String importString = "import org.opendaylight.snmp.OID;";
-    private static final String OIDClass = "/*\n" +
+    private static final String OID_CLASS = "/*\n" +
             " * Copyright (c) 2014 Cisco Systems, Inc. and others.  All rights reserved.\n" +
             " *\n" +
             " * This program and the accompanying materials are made available under the\n" +
@@ -67,10 +68,10 @@ public class OIDGenerator extends AbstractMojo {
             "}";
 
     public void execute() throws MojoExecutionException {
-        LOG = getLog();
+        log = getLog();
 
         // Read in the oid files
-        ArrayList<String> fileNames = new ArrayList(getFileNames(new ArrayList<String>(), oidDirectory.toPath()));
+        List<String> fileNames = new ArrayList(getFileNames(new ArrayList<String>(), oidDirectory.toPath()));
         nameToOIDHashMap = new HashMap<>();
 
         for (String fileName : fileNames) {
@@ -97,16 +98,16 @@ public class OIDGenerator extends AbstractMojo {
             // Write the new lines to the file
             try {
                 FileWriter fileWriter = new FileWriter(oidClassFile.getAbsolutePath());
-                fileWriter.write(OIDClass);
+                fileWriter.write(OID_CLASS);
                 fileWriter.close();
-            } catch (Exception e) {
-                LOG.info(e.getMessage());
+            } catch (IOException e) {
+                log.info("Error writting changes to file", e);
             }
         }
     }
 
-    private HashMap<String, String> parseOIDsFromFile(File file) {
-        HashMap<String, String> nameToOIDHashMap = new HashMap<>();
+    private Map<String, String> parseOIDsFromFile(File file) {
+        Map<String, String> nameToOIDMap = new HashMap<>();
         String pattern = "\"(\\w+)\"\\s+\"([\\d\\.]+)\"";
         Pattern regex = Pattern.compile(pattern);
         Matcher matcher;
@@ -119,29 +120,30 @@ public class OIDGenerator extends AbstractMojo {
                 if (matcher.find()){
                     String name = matcher.group(1).toLowerCase();
                     String oid = matcher.group(2);
-                    nameToOIDHashMap.put(name, oid);
+                    nameToOIDMap.put(name, oid);
                 }
             }
             br.close();
         } catch (Exception e) {
-            // Ignore the exceptions
+            log.debug("Exception while reading files", e);
         }
 
-        return nameToOIDHashMap;
+        return nameToOIDMap;
     }
 
     private List<String> getFileNames(List<String> fileNames, Path dir){
         try {
             DirectoryStream<Path> stream = Files.newDirectoryStream(dir);
             for (Path path : stream) {
-                if(path.toFile().isDirectory())getFileNames(fileNames, path);
-                else {
+                if(path.toFile().isDirectory()) {
+                    getFileNames(fileNames, path);
+                } else {
                     fileNames.add(path.toAbsolutePath().toString());
                 }
             }
             stream.close();
         }catch(IOException e){
-            e.printStackTrace();
+            log.warn("Error getting files in path", e);
         }
         return fileNames;
     }
@@ -151,7 +153,7 @@ public class OIDGenerator extends AbstractMojo {
     }
 
     private Boolean parseGeneratedYangFile(File file) {
-        ArrayList<String> newLines = new ArrayList<>();
+        List<String> newLines = new ArrayList<>();
 
         String pattern = "public\\s[\\w\\.]+\\s[g|s]et(\\w+)\\(";
         Pattern regex = Pattern.compile(pattern);
@@ -168,8 +170,6 @@ public class OIDGenerator extends AbstractMojo {
                     if (nameToOIDHashMap.containsKey(name)) {
                         isModified = true;
                         newLines.add(getAnnotation(nameToOIDHashMap.get(name)));
-                    } else {
-
                     }
                 }
                 newLines.add(line);
@@ -178,7 +178,7 @@ public class OIDGenerator extends AbstractMojo {
 
             if (isModified) {
                 // Write the new lines to the file
-                LOG.info(String.format("Writing changes to file %s", file.getName()));
+                log.info(String.format("Writing changes to file %s", file.getName()));
                 FileWriter fileWriter = new FileWriter(file.getAbsolutePath());
 
                 Boolean lastLineIsImport = false;
@@ -198,8 +198,9 @@ public class OIDGenerator extends AbstractMojo {
                 fileWriter.close();
             }
             return isModified;
-        } catch (Exception e) {
+        } catch (IOException e) {
             // Ignore the exceptions
+            log.debug("Exeption while wrinting new lines to file", e);
         }
         return false;
     }
