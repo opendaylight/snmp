@@ -104,8 +104,6 @@ public class AsyncGetHandler implements ResponseListener {
                 stop = true;
             }
 
-            LOG.debug(String.format("Stop: %s", stop));
-
             if (!stop && (lastBinding != null)) {
                 pdu.setRequestID(new Integer32(0));
                 pdu.set(0, lastBinding);
