@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.opendaylight.snmp</groupId>
         <artifactId>commons.parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.1.0-SNAPSHOT</version>
         <relativePath>../commons/parent</relativePath>
     </parent>
     <artifactId>mibs-model</artifactId>
@@ -89,7 +89,7 @@
             <plugin>
                 <groupId>org.opendaylight.snmp</groupId>
                 <artifactId>yang-oid-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.1.0-SNAPSHOT</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
