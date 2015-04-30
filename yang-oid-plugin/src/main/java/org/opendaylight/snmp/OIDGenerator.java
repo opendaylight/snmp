@@ -67,6 +67,16 @@ public class OIDGenerator extends AbstractMojo {
             "    public String value() default \"\";\n" +
             "}";
 
+    public OIDGenerator() {
+
+    }
+
+    OIDGenerator(File _oidDirectory, File _yangDirectory, File _oidClassFile) {
+        oidDirectory = _oidDirectory;
+        yangDirectory = _yangDirectory;
+        oidClassFile = _oidClassFile;
+    }
+
     public void execute() throws MojoExecutionException {
         log = getLog();
 
@@ -91,15 +101,13 @@ public class OIDGenerator extends AbstractMojo {
 
             // Write the OID class to disk
 
-            File oidClassFolder = new File(oidClassFile.getParent());
+            File oidClassFolder = oidClassFile.getParentFile();
             if (!oidClassFolder.exists()) {
                 oidClassFolder.mkdirs();
             }
             // Write the new lines to the file
             try {
-                FileWriter fileWriter = new FileWriter(oidClassFile.getAbsolutePath());
-                fileWriter.write(OID_CLASS);
-                fileWriter.close();
+                writeLinesToFile(OID_CLASS, oidClassFile);
             } catch (IOException e) {
                 log.info("Error writting changes to file", e);
             }
@@ -113,7 +121,7 @@ public class OIDGenerator extends AbstractMojo {
         Matcher matcher;
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
+            BufferedReader br = getReaderForFile(file);
             String line;
             while ((line = br.readLine()) != null) {
                 matcher = regex.matcher(line);
@@ -129,6 +137,21 @@ public class OIDGenerator extends AbstractMojo {
         }
 
         return nameToOIDMap;
+    }
+
+    BufferedReader getReaderForFile(File file) throws IOException {
+        try {
+            return new BufferedReader(new FileReader(file));
+        } catch (IOException e) {
+            log.warn("Error getting reader for file", e);
+            throw e;
+        }
+    }
+
+    void writeLinesToFile(String content, File file) throws IOException {
+        FileWriter fileWriter = new FileWriter(file.getAbsolutePath());
+        fileWriter.write(content);
+        fileWriter.close();
     }
 
     private List<String> getFileNames(List<String> fileNames, Path dir){
@@ -149,7 +172,11 @@ public class OIDGenerator extends AbstractMojo {
     }
 
     private String getAnnotation(String oid) {
-        return String.format("        @OID(value = \"%s\")", oid);
+        return String.format("        @org.opendaylight.snmp.OID(value = \"%s\")", oid);
+    }
+
+    FileWriter getFileWriterForFile(File file) throws IOException {
+        return new FileWriter(file.getAbsolutePath());
     }
 
     private Boolean parseGeneratedYangFile(File file) {
@@ -179,7 +206,7 @@ public class OIDGenerator extends AbstractMojo {
             if (isModified) {
                 // Write the new lines to the file
                 log.info(String.format("Writing changes to file %s", file.getName()));
-                FileWriter fileWriter = new FileWriter(file.getAbsolutePath());
+                FileWriter fileWriter = getFileWriterForFile(file);
 
                 Boolean lastLineIsImport = false;
                 Boolean isImportLine;
