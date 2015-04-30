@@ -22,24 +22,17 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInput
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommunityTarget;
-import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
-import org.snmp4j.event.ResponseEvent;
-import org.snmp4j.event.ResponseListener;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.Address;
-import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UdpAddress;
-import org.snmp4j.smi.Variable;
-import org.snmp4j.smi.VariableBinding;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 
 import java.io.IOException;
@@ -75,7 +68,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         Snmp snmp = null;
         try {
             snmp = new Snmp( new DefaultUdpTransportMapping());
-            snmp.listen();  // Do not forget this line!
+            snmp.listen();
         } catch (IOException e) {
             LOG.warn("Failed to create Snmp instance", e);
         }
@@ -108,65 +101,8 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
     @Override
     public Future<RpcResult<Void>> snmpSet(SnmpSetInput input) {
-        final SettableFuture<RpcResult<Void>> future = SettableFuture.create();
-
-        PDU pdu = new PDU();
-        OID oid = new OID(input.getOid());
-        Variable variable = new OctetString(input.getValue());
-        pdu.add(new VariableBinding(oid, variable));
-        pdu.setType(PDU.SET);
-
-        String community = input.getCommunity();
-        if (community == null) {
-            community = DEFAULT_COMMUNITY;
-        }
-
-        Target target = getTargetForIp(input.getIpAddress(), community);
-
-        try {
-            snmp.set(pdu, target, null, new ResponseListener() {
-                @Override
-                public void onResponse(ResponseEvent responseEvent) {
-                    // JavaDocs state not doing the following will cause a leak
-                    ((Snmp)responseEvent.getSource()).cancel(responseEvent.getRequest(), this);
-
-                    RpcResultBuilder<Void> rpcResultBuilder;
-                    PDU responseEventPDU = responseEvent.getResponse();
-                    if (responseEventPDU != null) {
-                        int errorStatus = responseEventPDU.getErrorStatus();
-                        if (errorStatus != PDU.noError) {
-                            // SET wasn't successful!
-
-                            int errorIndex = responseEventPDU.getErrorIndex();
-                            String errorString = responseEventPDU.getErrorStatusText();
-
-                            rpcResultBuilder = RpcResultBuilder.failed();
-                            rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
-                                    String.format("SnmpSET failed with error status: %s, error index: %s. StatusText: %s",
-                                            errorStatus, errorIndex, errorString));
-                        }
-                        else {
-                            rpcResultBuilder = RpcResultBuilder.success();
-                        }
-
-                    } else {
-                        // Response Event PDU was null
-                        rpcResultBuilder = RpcResultBuilder.failed();
-                        rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
-                                "SNMP set timed out.");
-                    }
-
-                    future.set(rpcResultBuilder.build());
-                }
-            });
-        } catch (IOException e) {
-            LOG.warn(e.getMessage());
-            RpcResultBuilder<Void> rpcResultBuilder = RpcResultBuilder.failed();
-            rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION, e.getMessage());
-            future.set(rpcResultBuilder.build());
-        }
-
-        return future;
+        AsyncSetHandler setHandler = new AsyncSetHandler(input, snmp);
+        return setHandler.getRpcResponse();
     }
 
     @Override
