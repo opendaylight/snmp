@@ -102,7 +102,6 @@ public class AsyncGetHandler implements ResponseListener {
                     stop = true;
                 }
             } else {
-                LOG.debug("Response was null");
                 stop = true;
             }
 
@@ -114,11 +113,9 @@ public class AsyncGetHandler implements ResponseListener {
                 setResult();
             }
 
-
         } catch (Exception e) {
             LOG.warn("Error parsing response", e);
         }
-
     }
 
     private void setResult() {
@@ -151,6 +148,7 @@ public class AsyncGetHandler implements ResponseListener {
 
     public SettableFuture<RpcResult<SnmpGetOutput>> getRpcResponse() {
         rpcSettableFuture = SettableFuture.create();
+        listSettableFuture = SettableFuture.create();
 
         try {
             sendRequest();
@@ -165,7 +163,6 @@ public class AsyncGetHandler implements ResponseListener {
     }
 
     public SettableFuture<List<VariableBinding>> getListResponse() {
-        listSettableFuture = SettableFuture.create();
         getRpcResponse();
         return listSettableFuture;
     }
