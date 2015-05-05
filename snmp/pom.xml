@@ -161,12 +161,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.opendaylight.controller</groupId>
-            <artifactId>sal-binding-api</artifactId>
-            <version>${mdsal.version}</version>
-        </dependency>
-
        <!-- Testing Dependencies -->
        <dependency>
            <groupId>junit</groupId>
