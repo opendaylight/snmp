@@ -75,6 +75,11 @@
                <version>${features.test.version}</version>
                <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -102,7 +107,7 @@
             </plugins>
             </pluginManagement>
         <plugins>
-                <plugin>
+            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
@@ -110,6 +115,9 @@
                     <includes>
                         <include>org.opendaylight.snmp.*</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/*HelpMojo.*</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -126,7 +134,25 @@
                         <phase>test</phase>
                     </execution>
                 </executions>
-                </plugin>
-            </plugins>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <failOnError>false</failOnError>
+                    <onlyAnalyze>org.opendaylight.snmp.*</onlyAnalyze>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>analyze-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>
