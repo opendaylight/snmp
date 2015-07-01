@@ -64,7 +64,6 @@ public class AsyncGetHandler implements ResponseListener {
         }
 
         target = SNMPImpl.getTargetForIp(getInput.getIpAddress(), community);
-
         if (snmpGetInput.getGetType().equals(SnmpGetType.GET)) {
             pdu.setType(PDU.GET);
         } else if (snmpGetInput.getGetType().equals(SnmpGetType.GETNEXT)) {
@@ -77,6 +76,10 @@ public class AsyncGetHandler implements ResponseListener {
     @Override
     public void onResponse(ResponseEvent responseEvent) {
         try {
+            // acknowledge receipt of the event
+            Object source = responseEvent.getSource();
+            ((Snmp)source).cancel(responseEvent.getRequest(), this);
+
             boolean stop = false;
             PDU response = responseEvent.getResponse();
             VariableBinding lastBinding = null;
@@ -98,10 +101,11 @@ public class AsyncGetHandler implements ResponseListener {
                     stop = true;
                 }
                 if (response.getErrorStatus() != PDU.noError) {
-                    LOG.info("Error: " + response.getErrorStatusText());
+                    LOG.error("Error: " + response.getErrorStatusText());
                     stop = true;
                 }
             } else {
+                LOG.error("Stopped due to timeout; results will be incomplete. Request: " + responseEvent.getRequest());
                 stop = true;
             }
 
@@ -114,7 +118,7 @@ public class AsyncGetHandler implements ResponseListener {
             }
 
         } catch (Exception e) {
-            LOG.warn("Error parsing response", e);
+            LOG.error("Error parsing response", e);
         }
     }
 

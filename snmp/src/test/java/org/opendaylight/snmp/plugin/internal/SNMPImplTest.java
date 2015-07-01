@@ -307,7 +307,7 @@ public class SNMPImplTest {
                     }
                 }
 
-                ResponseEvent responseEvent = new ResponseEvent(mockRpcReg,
+                ResponseEvent responseEvent = new ResponseEvent(mockSnmp,
                         new UdpAddress(Inet4Address.getByName(GET_IP_ADDRESS), snmpListenPort),
                         requestPDU,
                         responsePDU,
