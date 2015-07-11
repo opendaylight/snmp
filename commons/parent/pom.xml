@@ -57,7 +57,6 @@
         <snmp.impl.configfile>snmp-impl.xml</snmp.impl.configfile>
 
         <!-- Sonar config -->
-        <jacoco.version>0.6.2.201302030002</jacoco.version>
         <sonar-jacoco-listeners.version>2.4</sonar-jacoco-listeners.version>
         <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
         <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
@@ -110,7 +109,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
                 <configuration>
                     <includes>
                         <include>org.opendaylight.snmp.*</include>
