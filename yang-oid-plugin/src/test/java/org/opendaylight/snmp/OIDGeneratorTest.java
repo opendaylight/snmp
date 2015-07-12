@@ -27,8 +27,8 @@ import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -72,7 +72,7 @@ public class OIDGeneratorTest {
         doReturn(mockFileWriter).when(testOIDGenerator).getFileWriterForFile(testJavaYangModelFile);
         doNothing().when(testOIDGenerator).writeLinesToFile(anyString(), any(File.class));
 
-        doAnswer(new Answer() {
+        doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
                 String writeString = (String) invocationOnMock.getArguments()[0];
@@ -99,40 +99,29 @@ public class OIDGeneratorTest {
         testOIDGenerator.execute();
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
 
         String classOutputFolder = targetDir().getAbsolutePath() + "/generated-test-sources";
-        Iterable options = Arrays.asList("-d", classOutputFolder);
+        Iterable<String> options = Arrays.asList("-d", classOutputFolder);
 
         JavaFileObject fileObject = new JavaSourceFromString(IF_ENTRY_CLASS_NAME, changedFileBuilder.toString());
         Iterable<? extends JavaFileObject> iterableFileObjects = Arrays.asList(fileObject);
-        JavaCompiler.CompilationTask compilationTask = compiler.getTask(null, null, diagnosticCollector, options, null, iterableFileObjects);
 
-        boolean didSucceed = compilationTask.call();
-        Class ifEntryClass = null;
+        JavaCompiler.CompilationTask compilationTask = compiler.getTask(null, null, null, options, null, iterableFileObjects);
+        // compiler has been observed to fail to write errors either to provided Writer or to DiagnosticCollector, Oracle SE 1.7.0_45-b18
+        assertTrue("Compilation failed, see stderr above", compilationTask.call());
 
-        if (didSucceed) {
-            try {
-                URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{new File(classOutputFolder).toURL()});
-                ifEntryClass = classLoader.loadClass(IF_ENTRY_CLASS_NAME);
-            } catch (ClassNotFoundException e) {
-                throw e;
-            }
-        } else {
-            fail("Compilation failed");
-        }
+        Class<?> ifEntryClass = null;
+        URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{new File(classOutputFolder).toURI().toURL()});
+        ifEntryClass = classLoader.loadClass(IF_ENTRY_CLASS_NAME);
 
         List<String> testMethodNames = Arrays.asList("getIfDescr", "getIfMtu", "setIfMtu", "setIfDescr");
 
-        if (ifEntryClass != null) {
-            for (Method method : ifEntryClass.getMethods()) {
-                if (testMethodNames.contains(method.getName())) {
-                    OID oid = method.getAnnotation(OID.class);
-                    assertNotNull("OID for method" + method.getName() + " was null", oid);
-                }
+        assertNotNull("ifEntryClass is null", ifEntryClass);
+        for (Method method : ifEntryClass.getMethods()) {
+            if (testMethodNames.contains(method.getName())) {
+                OID oid = method.getAnnotation(OID.class);
+                assertNotNull("OID for method" + method.getName() + " was null", oid);
             }
-        } else {
-            fail("ifEntryClass is null");
         }
     }
 

@@ -8,7 +8,7 @@
 package org.opendaylight.snmp;
 
 import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -77,11 +77,12 @@ public class OIDGenerator extends AbstractMojo {
         oidClassFile = _oidClassFile;
     }
 
-    public void execute() throws MojoExecutionException {
+    @Override
+    public void execute() throws MojoFailureException {
         log = getLog();
 
         // Read in the oid files
-        List<String> fileNames = new ArrayList(getFileNames(new ArrayList<String>(), oidDirectory.toPath()));
+        List<String> fileNames = new ArrayList<>(getFileNames(new ArrayList<String>(), oidDirectory.toPath()));
         nameToOIDHashMap = new HashMap<>();
 
         for (String fileName : fileNames) {
@@ -93,7 +94,12 @@ public class OIDGenerator extends AbstractMojo {
         Boolean modified = false;
         for (String fileName : fileNames) {
             // Parse all the generated yang files
-            modified = parseGeneratedYangFile(new File(fileName)) || modified;
+            try {
+                modified = parseAndUpdateGeneratedYangFile(new File(fileName)) || modified;
+            } catch (IOException e) {
+                log.error("Could not process " + fileName, e);
+                throw new MojoFailureException("Could not process " + fileName + " due to " + e);
+            }
         }
 
         if (modified) {
@@ -175,11 +181,15 @@ public class OIDGenerator extends AbstractMojo {
         return String.format("        @org.opendaylight.snmp.OID(value = \"%s\")", oid);
     }
 
+    private boolean isAnnotation(String line) {
+        return line.contains("@org.opendaylight.snmp.OID(value =");
+    }
+
     FileWriter getFileWriterForFile(File file) throws IOException {
         return new FileWriter(file.getAbsolutePath());
     }
 
-    private Boolean parseGeneratedYangFile(File file) {
+    private Boolean parseAndUpdateGeneratedYangFile(File file) throws IOException {
         List<String> newLines = new ArrayList<>();
 
         String pattern = "public\\s[\\w\\.]+\\s[g|s]et(\\w+)\\(";
@@ -187,8 +197,7 @@ public class OIDGenerator extends AbstractMojo {
         Matcher matcher;
         Boolean isModified = false;
 
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 matcher = regex.matcher(line);
@@ -198,16 +207,19 @@ public class OIDGenerator extends AbstractMojo {
                         isModified = true;
                         newLines.add(getAnnotation(nameToOIDHashMap.get(name)));
                     }
+                } else if (isAnnotation(line)) {
+                    log.debug("Replacing existing annotation: " + line.trim());
+                    isModified = true;
+                    continue;
                 }
                 newLines.add(line);
             }
-            br.close();
+        }
 
-            if (isModified) {
-                // Write the new lines to the file
-                log.info(String.format("Writing changes to file %s", file.getName()));
-                FileWriter fileWriter = getFileWriterForFile(file);
-
+        if (isModified) {
+            // Write the new lines to the file
+            log.info(String.format("Writing changes to file %s", file.getName()));
+            try (FileWriter fileWriter = getFileWriterForFile(file)) {
                 Boolean lastLineIsImport = false;
                 Boolean isImportLine;
                 for (String newLine : newLines) {
@@ -221,14 +233,8 @@ public class OIDGenerator extends AbstractMojo {
                     lastLineIsImport = isImportLine;
                     fileWriter.write(newLine + "\n");
                 }
-
-                fileWriter.close();
             }
-            return isModified;
-        } catch (IOException e) {
-            // Ignore the exceptions
-            log.debug("Exeption while wrinting new lines to file", e);
         }
-        return false;
+        return isModified;
     }
 }
