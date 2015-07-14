@@ -23,7 +23,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInput
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snmp4j.Snmp;
 import org.snmp4j.smi.IpAddress;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.TimeTicks;
@@ -45,9 +44,9 @@ public class MibTable<T> {
     private SnmpGetInputBuilder snmpGetInputBuilder;
     private Class<T> builderClass;
     private Map<Integer, T> indexToBuilderObject;
-    private Snmp snmp;
+    private SNMPImpl snmp;
 
-    public MibTable(Snmp snmp, Ipv4Address ipv4Address, Class<T> builderClass) {
+    public MibTable(SNMPImpl snmp, Ipv4Address ipv4Address, Class<T> builderClass) {
         this.snmp = snmp;
         this.builderClass = builderClass;
         snmpGetInputBuilder = new SnmpGetInputBuilder()
@@ -56,7 +55,7 @@ public class MibTable<T> {
                 .setGetType(SnmpGetType.GETWALK);
     }
 
-    public MibTable(Snmp snmp, Ipv4Address ipv4Address, String community, Class<T> builderClass) {
+    public MibTable(SNMPImpl snmp, Ipv4Address ipv4Address, String community, Class<T> builderClass) {
         this.snmp = snmp;
         this.builderClass = builderClass;
         snmpGetInputBuilder = new SnmpGetInputBuilder()
@@ -122,7 +121,7 @@ public class MibTable<T> {
 
         // Send the request for the oid
         Variable variable = null;
-        Class objectType = null;
+        Class<?> objectType = null;
         for (int i=0; i<variableBindings.size(); i++) {
             VariableBinding variableBinding = variableBindings.get(i);
 

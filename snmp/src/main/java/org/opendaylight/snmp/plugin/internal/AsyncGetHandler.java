@@ -32,10 +32,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.opendaylight.snmp.plugin.internal.SNMPImpl.DEFAULT_COMMUNITY;
-import static org.opendaylight.snmp.plugin.internal.SNMPImpl.MAXREPETITIONS;
-
-
 public class AsyncGetHandler implements ResponseListener {
     private static final Logger LOG = LoggerFactory.getLogger(AsyncGetHandler.class);
 
@@ -48,22 +44,22 @@ public class AsyncGetHandler implements ResponseListener {
     private OID oid;
     private Snmp snmp;
 
-    public AsyncGetHandler(SnmpGetInput getInput, Snmp snmp) {
+    public AsyncGetHandler(SnmpGetInput getInput, SNMPImpl snmp) {
         snmpGetInput = getInput;
-        this.snmp = snmp;
+        this.snmp = snmp.snmp;
         pdu = new PDU();
         oid = new OID(snmpGetInput.getOid());
         pdu.add(new VariableBinding(oid));
-        pdu.setMaxRepetitions(MAXREPETITIONS);
+        pdu.setMaxRepetitions(snmp.getMaxRepetitions());
         pdu.setNonRepeaters(0);
         variableBindings = new ArrayList<>();
 
         String community = getInput.getCommunity();
         if (community == null) {
-            community = DEFAULT_COMMUNITY;
+            community = SNMPImpl.DEFAULT_COMMUNITY;
         }
 
-        target = SNMPImpl.getTargetForIp(getInput.getIpAddress(), community);
+        target = snmp.getTargetForIp(getInput.getIpAddress(), community);
         if (snmpGetInput.getGetType().equals(SnmpGetType.GET)) {
             pdu.setType(PDU.GET);
         } else if (snmpGetInput.getGetType().equals(SnmpGetType.GETNEXT)) {

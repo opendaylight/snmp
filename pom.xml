@@ -43,6 +43,7 @@
 
     <modules>
         <module>commons/parent</module>
+        <module>config</module>
         <module>yang-oid-plugin</module>
         <module>mibs-model</module>
         <module>snmp</module>

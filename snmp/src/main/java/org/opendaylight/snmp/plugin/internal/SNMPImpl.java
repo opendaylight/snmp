@@ -45,23 +45,43 @@ import java.util.concurrent.Future;
 public class SNMPImpl implements SnmpService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SNMPImpl.class);
     static final String DEFAULT_COMMUNITY = "public";
-    private Snmp snmp;
     static final Integer SNMP_LISTEN_PORT = 161;
-    static final int RETRIES = 1;
-    static final int TIMEOUT = 500;
-    static final int MAXREPETITIONS = 10000;
+    protected Snmp snmp;
 
-    private final RpcProviderRegistry rpcProviderRegistery;
+    private final RpcProviderRegistry rpcProviderRegistry;
     private final BindingAwareBroker.RpcRegistration<SnmpService> rpcRegistration;
+    private int retries = 5;
+    /** Read/write timeout in milliseconds */
+    private long timeoutMs = 1000;
+    private int maxRepetitions = 10000;
 
-    public SNMPImpl(RpcProviderRegistry rpcProviderRegistery) {
-        this(rpcProviderRegistery, initSnmp());
+    public SNMPImpl(RpcProviderRegistry rpcProviderRegistry) {
+        this(rpcProviderRegistry, initSnmp());
     }
 
     SNMPImpl(RpcProviderRegistry rpcProviderRegistery, Snmp snmp) {
-        this.rpcProviderRegistery = Preconditions.checkNotNull(rpcProviderRegistery);
+        this.rpcProviderRegistry = Preconditions.checkNotNull(rpcProviderRegistery);
         this.snmp = Preconditions.checkNotNull(snmp);
-        this.rpcRegistration = this.rpcProviderRegistery.addRpcImplementation(SnmpService.class, this);
+        this.rpcRegistration = this.rpcProviderRegistry.addRpcImplementation(SnmpService.class, this);
+    }
+
+    public int getRetries() {
+        return this.retries;
+    }
+    public void setRetries(int retries) {
+        this.retries = retries;
+    }
+    public long getTimeout() {
+        return this.timeoutMs;
+    }
+    public void setTimeout(long timeoutMs) {
+        this.timeoutMs = timeoutMs;
+    }
+    public int getMaxRepetitions() {
+        return this.maxRepetitions;
+    }
+    public void setMaxRepetitions(int maxRepetitions) {
+        this.maxRepetitions = maxRepetitions;
     }
 
     private static Snmp initSnmp() {
@@ -75,7 +95,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         return snmp;
     }
 
-    static Target getTargetForIp(Ipv4Address address, String community) {
+    protected Target getTargetForIp(Ipv4Address address, String community) {
         Address addr = null;
         try {
             addr = new UdpAddress(Inet4Address.getByName(address.getValue()), SNMP_LISTEN_PORT);
@@ -87,8 +107,8 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         CommunityTarget communityTarget = new CommunityTarget();
         communityTarget.setCommunity(new OctetString(community));
         communityTarget.setAddress(addr);
-        communityTarget.setRetries(RETRIES);
-        communityTarget.setTimeout(TIMEOUT);
+        communityTarget.setRetries(this.retries);
+        communityTarget.setTimeout(this.timeoutMs);
         communityTarget.setVersion(SnmpConstants.version2c);
         return communityTarget;
     }
@@ -96,13 +116,13 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     @Override
     public Future<RpcResult<SnmpGetOutput>> snmpGet(SnmpGetInput input) {
         LOG.info("Sending " + input.getGetType() + " SNMP request for host: " + input.getIpAddress() + " for OID: " + input.getOid() + " Community: " + input.getCommunity());
-        AsyncGetHandler getHandler = new AsyncGetHandler(input, snmp);
+        AsyncGetHandler getHandler = new AsyncGetHandler(input, this);
         return getHandler.getRpcResponse();
     }
 
     @Override
     public Future<RpcResult<Void>> snmpSet(SnmpSetInput input) {
-        AsyncSetHandler setHandler = new AsyncSetHandler(input, snmp);
+        AsyncSetHandler setHandler = new AsyncSetHandler(input, this);
         return setHandler.getRpcResponse();
     }
 
@@ -114,7 +134,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         Runnable nonBlockingPopulateRunnable = new Runnable() {
             @Override
             public void run() {
-                MibTable<IfEntryBuilder> ifEntryBuilderMibTable = new MibTable<>(snmp, getInterfacesInput.getIpAddress(), getInterfacesInput.getCommunity(), IfEntryBuilder.class);
+                MibTable<IfEntryBuilder> ifEntryBuilderMibTable = new MibTable<>(SNMPImpl.this, getInterfacesInput.getIpAddress(), getInterfacesInput.getCommunity(), IfEntryBuilder.class);
 
                 GetInterfacesOutputBuilder getInterfacesOutputBuilder = new GetInterfacesOutputBuilder();
 
@@ -142,7 +162,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
         if(rpcRegistration != null) {
             rpcRegistration.close();
         }

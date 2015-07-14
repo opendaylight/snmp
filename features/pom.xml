@@ -81,7 +81,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>snmp</artifactId>
+      <artifactId>snmp-config</artifactId>
       <version>${project.version}</version>
       <classifier>config</classifier>
       <type>xml</type>
@@ -107,15 +107,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>${slf4j.version}</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.snmp4j</artifactId>
-      <version>${apache.servicemix.version}</version>
-    </dependency>
-
   </dependencies>
 
   <build>

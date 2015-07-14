@@ -39,8 +39,8 @@ public class AsyncSetHandler implements ResponseListener {
     private PDU pdu;
 
 
-    public AsyncSetHandler(SnmpSetInput input, Snmp snmp) {
-        snmp4j = snmp;
+    public AsyncSetHandler(SnmpSetInput input, SNMPImpl snmp) {
+        snmp4j = snmp.snmp;
         snmpSetInput = input;
 
         String community = input.getCommunity();
@@ -48,7 +48,7 @@ public class AsyncSetHandler implements ResponseListener {
             community = SNMPImpl.DEFAULT_COMMUNITY;
         }
 
-        target = SNMPImpl.getTargetForIp(input.getIpAddress(), community);
+        target = snmp.getTargetForIp(input.getIpAddress(), community);
         oid  = new OID(input.getOid());
         pdu = new PDU();
         pdu.add(new VariableBinding(oid, new OctetString(input.getValue())));
@@ -82,7 +82,7 @@ public class AsyncSetHandler implements ResponseListener {
                 Integer intValue = Integer.parseInt(value);
                 variableBinding = new VariableBinding(oid, new Integer32(intValue));
             } catch (NumberFormatException e) {
-                throw new SetTypeException("Unknown set type");
+                throw new SetTypeException("Unknown set type: " + value);
             }
         } else if (variable instanceof Integer32) {
 
@@ -96,7 +96,7 @@ public class AsyncSetHandler implements ResponseListener {
 
         } else if (variable instanceof Counter64) {
             // We're out of options to set it to
-            throw new SetTypeException("Unknown Set type");
+            throw new SetTypeException("Unknown set type: " + variable);
         }
 
         pdu.clear();

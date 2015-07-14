@@ -8,6 +8,8 @@
 package org.opendaylight.snmp.plugin.internal;
 
 public class SetTypeException extends Exception {
+    private static final long serialVersionUID = -945317840430789167L;
+
     public SetTypeException(String msg) {
         super(msg);
     }

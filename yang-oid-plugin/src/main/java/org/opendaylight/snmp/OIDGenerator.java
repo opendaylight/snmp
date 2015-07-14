@@ -220,17 +220,7 @@ public class OIDGenerator extends AbstractMojo {
             // Write the new lines to the file
             log.info(String.format("Writing changes to file %s", file.getName()));
             try (FileWriter fileWriter = getFileWriterForFile(file)) {
-                Boolean lastLineIsImport = false;
-                Boolean isImportLine;
                 for (String newLine : newLines) {
-                    // Include the import statement for the OID tag as the last import
-
-                    isImportLine = newLine.trim().startsWith("import ");
-                    if (!isImportLine && lastLineIsImport) {
-                        fileWriter.write(IMPORT_STRING + "\n");
-                    }
-
-                    lastLineIsImport = isImportLine;
                     fileWriter.write(newLine + "\n");
                 }
             }

@@ -81,7 +81,15 @@ module snmp {
     augment "/config:modules/config:module/config:configuration" {
         case snmp-impl {
             when "/config:modules/config:module/config:type = 'snmp-impl'";
-
+            leaf retries {
+                type uint16;
+            }
+            leaf timeout {
+                type uint32;
+            }
+            leaf max-repetitions {
+                type uint16;
+            }
             container rpc-registry {
                 uses config:service-ref {
                     refine type {

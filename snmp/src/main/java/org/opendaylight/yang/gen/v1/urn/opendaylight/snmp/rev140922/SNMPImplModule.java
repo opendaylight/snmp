@@ -22,7 +22,14 @@ public class SNMPImplModule extends org.opendaylight.yang.gen.v1.urn.opendayligh
 
     @Override
     public java.lang.AutoCloseable createInstance() {
-       return new SNMPImpl(getRpcRegistryDependency());
+        SNMPImpl instance = new SNMPImpl(getRpcRegistryDependency());
+        try {
+            instance.setRetries(getRetries());
+            instance.setTimeout(getTimeout());
+            instance.setMaxRepetitions(getMaxRepetitions());
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException("some default config values were not found in etc; using coded defaults", e);
+        }
+        return instance;
     }
-
 }

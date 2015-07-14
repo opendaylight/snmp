@@ -60,7 +60,6 @@
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>${yangtools.version}</version>
                 <executions>
                     <execution>
                         <id>config</id>
@@ -101,33 +100,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
-           <!-- put config files in m2 repo -->
-           <plugin>
-             <groupId>org.codehaus.mojo</groupId>
-             <artifactId>build-helper-maven-plugin</artifactId>
-             <version>1.9.1</version>
-             <executions>
-               <execution>
-                 <id>attach-artifacts</id>
-                 <goals>
-                   <goal>attach-artifact</goal>
-                 </goals>
-                 <phase>package</phase>
-                 <configuration>
-                   <artifacts>
-                     <!-- duplicate this section to create more config files using a unique classifier -->
-                     <artifact>
-                       <file>${project.build.directory}/classes/initial/${snmp.impl.configfile}</file>
-                       <type>xml</type>
-                       <classifier>config</classifier>
-                     </artifact>
-                   </artifacts>
-                 </configuration>
-               </execution>
-             </executions>
-           </plugin>
-
         </plugins>
     </build>
     <dependencies>

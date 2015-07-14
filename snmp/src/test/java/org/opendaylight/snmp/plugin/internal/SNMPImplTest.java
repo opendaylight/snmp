@@ -63,10 +63,10 @@ public class SNMPImplTest {
     private static final String GET_IP_ADDRESS = "10.10.10.10";
     private static final String SET_IP_ADDRESS = "20.20.20.20";
     private static final Integer snmpListenPort = 161;
-    private static final String COMMUNITY = "ComunityName";
+    private static final String COMMUNITY = "CommunityName";
     private static final String VALUE = "test";
-    private static final int RETRIES = 1;
-    private static final int TIMEOUT = 500;
+    private static final int RETRIES = 5;
+    private static final int TIMEOUT = 1000;
     private static final int MAXREPETITIONS = 10000;
 
     private static Snmp mockSnmp = null;
@@ -319,16 +319,17 @@ public class SNMPImplTest {
             }
         }).when(mockSnmp).send(any(PDU.class), any(Target.class), any(), (ResponseListener) any());
 
-        SNMPImpl snmpImpl = new SNMPImpl(mockRpcReg, mockSnmp);
+        try (SNMPImpl snmpImpl = new SNMPImpl(mockRpcReg, mockSnmp)) {
 
-        Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
-        GetInterfacesInputBuilder input = new GetInterfacesInputBuilder();
-        input.setCommunity(COMMUNITY);
-        input.setIpAddress(ip);
+            Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
+            GetInterfacesInputBuilder input = new GetInterfacesInputBuilder();
+            input.setCommunity(COMMUNITY);
+            input.setIpAddress(ip);
 
-        RpcResult<GetInterfacesOutput> result = null;
-        Future<RpcResult<GetInterfacesOutput>> resultFuture = snmpImpl.getInterfaces(input.build());
-        result = resultFuture.get();
-        assertTrue(result.isSuccessful());
+            RpcResult<GetInterfacesOutput> result = null;
+            Future<RpcResult<GetInterfacesOutput>> resultFuture = snmpImpl.getInterfaces(input.build());
+            result = resultFuture.get();
+            assertTrue(result.isSuccessful());
+        }
     }
 }
