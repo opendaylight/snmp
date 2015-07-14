@@ -331,4 +331,127 @@ public class SNMPImplTest {
         result = resultFuture.get();
         assertTrue(result.isSuccessful());
     }
+
+    /*
+     * create a response for a GETBULK request
+     * @startWith sub-identifier to start with
+     * @startWith sub-identifier to end with; if <code>endWith &lt; startWith</code> return no results
+     */
+    public static ResponseEvent createBulkResponseEvent(int startWith, int endWith) throws UnknownHostException {
+        // create request PDU
+        PDU requestPdu = new PDU();
+        OID requestOid = new OID(SYS_OID_REQUEST + "." + startWith);
+        requestPdu.add(new VariableBinding(requestOid));
+        requestPdu.setMaxRepetitions(MAXREPETITIONS);
+        requestPdu.setNonRepeaters(0);
+        requestPdu.setType(PDU.GETBULK);
+
+        // create response PDU
+        PDU responsePdu = new PDU();
+        for (int i = startWith; i <= endWith; i++) {
+          OID responseOid = new OID(SYS_OID_REQUEST + "." + i);
+          Variable variable = new OctetString(SYS_OID_RESPONSE);
+          responsePdu.add(new VariableBinding(responseOid, variable));
+        }
+        responsePdu.setMaxRepetitions(10000);
+        responsePdu.setNonRepeaters(0);
+        responsePdu.setType(PDU.GETBULK);
+
+        // create ip address
+        Address addr = null;
+        addr = new UdpAddress(Inet4Address.getByName(GET_IP_ADDRESS), snmpListenPort);
+
+        // create the ResponseEvent
+        ResponseEvent responseEvent = new ResponseEvent(mockSnmp,     // source
+                                          addr,                       // peer address
+                                          requestPdu,                 // request PDU
+                                          responsePdu,                // response PDU
+                                          null,                       // User object
+                                          null);                      // error
+        return responseEvent;
+    }
+
+    @Test
+    public void testWalk() throws IOException, InterruptedException, ExecutionException {
+        int stopWithBinding = 95;
+        List<Results> snmpResults = bulkTest(10, stopWithBinding, Integer.MAX_VALUE); // no timeout simulation
+        assertEquals("Checking results size", stopWithBinding, snmpResults.size());
+    }
+
+    @Test
+    public void testWalkTimeout() throws IOException, InterruptedException, ExecutionException {
+        int timeoutAfterBinding = 100;
+        List<Results> snmpResults = bulkTest(10, 200, timeoutAfterBinding);
+        assertEquals("Checking results size", timeoutAfterBinding, snmpResults.size());
+    }
+
+    private List<Results> bulkTest(final int bindingsPerCall, final int stopWithBinding, final int timeoutAfterBinding) throws IOException, InterruptedException, ExecutionException {
+        doAnswer(new Answer<Object>() {
+            public Object answer(InvocationOnMock invocation) throws UnknownHostException, InterruptedException {
+                PDU pdu = (PDU)invocation.getArguments()[0];
+                OID oid = pdu.getVariableBindings().get(0).getOid();
+                assertTrue("Checking PDU OID value", oid.toString().startsWith(SYS_OID_REQUEST));
+                int last = oid.removeLast();
+                int startWith = last + 1;
+                oid.append(startWith);
+                ResponseEvent responseEvent;
+                if (last < timeoutAfterBinding) {
+                    int endWith = Math.min(last + bindingsPerCall, stopWithBinding);
+                    responseEvent = createBulkResponseEvent(startWith, endWith);
+                } else {
+                    // null responsePdu means timeout - see AsyncGetHandler
+                    responseEvent = new ResponseEvent(mockSnmp, null, null, null, null, null);
+                }
+                ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
+                callback.onResponse(responseEvent);
+                return null;
+            }
+        }).when(mockSnmp).send(argThat(new ArgumentMatcher<PDU>(){
+            @Override
+            public boolean matches(Object argument) {
+                if (argument instanceof PDU) {
+                    PDU pdu = (PDU)argument;
+                    assertEquals("Checking PDU Get type", pdu.getType(), PDU.GETBULK);
+                    assertTrue("Checking PDU OID value", pdu.getVariableBindings().get(0).getOid().toString().startsWith(SYS_OID_REQUEST));
+                    assertEquals("Checking max repetitions", pdu.getMaxRepetitions(), MAXREPETITIONS);
+                    return true;
+                }
+                return false;
+            }}), argThat(new ArgumentMatcher<Target>(){
+                @Override
+                public boolean matches(Object argument) {
+                    if (argument instanceof Target) {
+                        Target target = (Target)argument;
+                        assertEquals(target.getSecurityName().toString(), COMMUNITY);
+                        assertEquals(target.getAddress().toString(), (GET_IP_ADDRESS + "/" + snmpListenPort.toString()));
+                        assertEquals(target.getTimeout(), TIMEOUT);
+                        assertEquals(target.getRetries(), RETRIES);
+                        assertEquals(target.getVersion(), SnmpConstants.version2c);
+                        return true;
+                    }
+                    return false;
+                }}),  any(), (ResponseListener) any());
+
+        try (SNMPImpl snmpImpl = new SNMPImpl(mockRpcReg, mockSnmp)) {
+            Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
+            SnmpGetInputBuilder input = new SnmpGetInputBuilder();
+            input.setCommunity(COMMUNITY);
+            input.setIpAddress(ip);
+            input.setOid(SYS_OID_REQUEST);
+            input.setGetType(SnmpGetType.GETWALK);
+
+            Future<RpcResult<SnmpGetOutput>> resultFuture = snmpImpl.snmpGet(input.build());
+
+            RpcResult<SnmpGetOutput> result = resultFuture.get();
+            assertTrue("Checking results success", result.isSuccessful());
+            SnmpGetOutput output = result.getResult();
+            List<Results> snmpResults = output.getResults();
+            for (Results r: snmpResults) {
+                String oid = r.getOid();
+                assertEquals("Checking results value, oid " + oid, SYS_OID_RESPONSE, r.getValue());
+                assertTrue("Checking results oid " + oid, oid.startsWith(SYS_OID_REQUEST));
+            }
+            return snmpResults;
+        }
+    }
 }

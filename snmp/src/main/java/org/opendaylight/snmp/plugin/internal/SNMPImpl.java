@@ -142,7 +142,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
         if(rpcRegistration != null) {
             rpcRegistration.close();
         }
