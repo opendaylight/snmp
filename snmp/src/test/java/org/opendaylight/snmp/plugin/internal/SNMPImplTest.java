@@ -20,8 +20,6 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.Results;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
@@ -45,6 +43,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
@@ -55,15 +54,13 @@ import static org.mockito.Mockito.when;
 
 
 public class SNMPImplTest {
-    private static final Logger LOG = LoggerFactory.getLogger(SNMPImplTest.class);
-
     private static final String SYS_OID_REQUEST = "1.3.6.1.2.1.1.2.0";
     private static final String SYS_OID_RESPONSE = "1.3.6.1.4.1.11.2.3.7.11.119";
     private static final String LOCATION_OID = "1.3.6.1.2.1.1.6.0";
     private static final String GET_IP_ADDRESS = "10.10.10.10";
     private static final String SET_IP_ADDRESS = "20.20.20.20";
     private static final Integer snmpListenPort = 161;
-    private static final String COMMUNITY = "ComunityName";
+    private static final String COMMUNITY = "CommunityName";
     private static final String VALUE = "test";
     private static final int RETRIES = 1;
     private static final int TIMEOUT = 500;
@@ -319,17 +316,17 @@ public class SNMPImplTest {
             }
         }).when(mockSnmp).send(any(PDU.class), any(Target.class), any(), (ResponseListener) any());
 
-        SNMPImpl snmpImpl = new SNMPImpl(mockRpcReg, mockSnmp);
+        try (SNMPImpl snmpImpl = new SNMPImpl(mockRpcReg, mockSnmp)) {
+            Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
+            GetInterfacesInputBuilder input = new GetInterfacesInputBuilder();
+            input.setCommunity(COMMUNITY);
+            input.setIpAddress(ip);
 
-        Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
-        GetInterfacesInputBuilder input = new GetInterfacesInputBuilder();
-        input.setCommunity(COMMUNITY);
-        input.setIpAddress(ip);
-
-        RpcResult<GetInterfacesOutput> result = null;
-        Future<RpcResult<GetInterfacesOutput>> resultFuture = snmpImpl.getInterfaces(input.build());
-        result = resultFuture.get();
-        assertTrue(result.isSuccessful());
+            RpcResult<GetInterfacesOutput> result = null;
+            Future<RpcResult<GetInterfacesOutput>> resultFuture = snmpImpl.getInterfaces(input.build());
+            result = resultFuture.get();
+            assertTrue(result.isSuccessful());
+        }
     }
 
     /*
@@ -373,19 +370,27 @@ public class SNMPImplTest {
 
     @Test
     public void testWalk() throws IOException, InterruptedException, ExecutionException {
-        int stopWithBinding = 95;
-        List<Results> snmpResults = bulkTest(10, stopWithBinding, Integer.MAX_VALUE); // no timeout simulation
+        int stopWithBinding = 95; // number of bindings to simulate - the SNMPImpl mock does not know this number
+        RpcResult<SnmpGetOutput> result = bulkTest(10, stopWithBinding, Integer.MAX_VALUE); // no timeout simulation
+        assertTrue("Checking results success", result.isSuccessful());
+        List<Results> snmpResults = result.getResult().getResults();
         assertEquals("Checking results size", stopWithBinding, snmpResults.size());
     }
 
+    /**
+     * Walk some OIDS and simulate a timeout partway through.  This also tests exception handling in {@link AsyncGetHandler},
+     * since timeouts lead to thrown exceptions there.
+     */
     @Test
     public void testWalkTimeout() throws IOException, InterruptedException, ExecutionException {
         int timeoutAfterBinding = 100;
-        List<Results> snmpResults = bulkTest(10, 200, timeoutAfterBinding);
-        assertEquals("Checking results size", timeoutAfterBinding, snmpResults.size());
+        RpcResult<SnmpGetOutput> result = bulkTest(10, 200, timeoutAfterBinding);
+        assertFalse("Checking results success", result.isSuccessful());
+        List<Results> snmpResults = result.getResult().getResults();
+        assertEquals("Checking results size", timeoutAfterBinding, snmpResults.size()); // partial result set, up to the timeout
     }
 
-    private List<Results> bulkTest(final int bindingsPerCall, final int stopWithBinding, final int timeoutAfterBinding) throws IOException, InterruptedException, ExecutionException {
+    private RpcResult<SnmpGetOutput> bulkTest(final int bindingsPerCall, final int stopWithBinding, final int timeoutAfterBinding) throws IOException, InterruptedException, ExecutionException {
         doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) throws UnknownHostException, InterruptedException {
                 PDU pdu = (PDU)invocation.getArguments()[0];
@@ -443,7 +448,6 @@ public class SNMPImplTest {
             Future<RpcResult<SnmpGetOutput>> resultFuture = snmpImpl.snmpGet(input.build());
 
             RpcResult<SnmpGetOutput> result = resultFuture.get();
-            assertTrue("Checking results success", result.isSuccessful());
             SnmpGetOutput output = result.getResult();
             List<Results> snmpResults = output.getResults();
             for (Results r: snmpResults) {
@@ -451,7 +455,7 @@ public class SNMPImplTest {
                 assertEquals("Checking results value, oid " + oid, SYS_OID_RESPONSE, r.getValue());
                 assertTrue("Checking results oid " + oid, oid.startsWith(SYS_OID_REQUEST));
             }
-            return snmpResults;
+            return result;
         }
     }
 }
