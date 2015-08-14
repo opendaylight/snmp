@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Adam Dierkens <adam@dierkens.com>
+Submitted-by: Adam Dierkens <adam@dierkens.com>
+Submitted-at: Fri, 14 Aug 2015 15:27:03 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/25250
+Project: snmp
+Branch: refs/heads/stable/lithium
