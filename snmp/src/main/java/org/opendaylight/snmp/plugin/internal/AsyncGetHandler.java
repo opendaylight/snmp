@@ -9,6 +9,7 @@
 package org.opendaylight.snmp.plugin.internal;
 
 import com.google.common.util.concurrent.SettableFuture;
+
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutputBuilder;
@@ -16,6 +17,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.Results;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.ResultsBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError;
+import org.opendaylight.yangtools.yang.common.RpcError.ErrorType;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.slf4j.Logger;
@@ -32,6 +34,7 @@ import org.snmp4j.smi.VariableBinding;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static org.opendaylight.snmp.plugin.internal.SNMPImpl.DEFAULT_COMMUNITY;
 import static org.opendaylight.snmp.plugin.internal.SNMPImpl.MAXREPETITIONS;
@@ -43,7 +46,8 @@ public class AsyncGetHandler implements ResponseListener {
     private SnmpGetInput snmpGetInput;
     private SettableFuture<RpcResult<SnmpGetOutput>> rpcSettableFuture;
     private SettableFuture<List<VariableBinding>> listSettableFuture;
-    private List<VariableBinding> variableBindings;
+    private final List<VariableBinding> variableBindings = new ArrayList<>();
+    private final List<Results> resultsArrayList = new ArrayList<>();
     private Target target;
     private PDU pdu;
     private OID oid;
@@ -57,7 +61,6 @@ public class AsyncGetHandler implements ResponseListener {
         pdu.add(new VariableBinding(oid));
         pdu.setMaxRepetitions(MAXREPETITIONS);
         pdu.setNonRepeaters(0);
-        variableBindings = new ArrayList<>();
 
         String community = getInput.getCommunity();
         if (community == null) {
@@ -95,7 +98,7 @@ public class AsyncGetHandler implements ResponseListener {
                         stop = true;
                         break;
                     } else {
-                        variableBindings.add(binding);
+                        storeResult(binding);
                     }
                 }
                 if (!snmpGetInput.getGetType().equals(SnmpGetType.GETWALK)) {
@@ -106,8 +109,7 @@ public class AsyncGetHandler implements ResponseListener {
                     stop = true;
                 }
             } else {
-                LOG.error("Stopped due to timeout; results will be incomplete. Request: " + responseEvent.getRequest());
-                stop = true;
+                throw new TimeoutException("Stopped due to timeout; results will be incomplete. Request: " + responseEvent.getRequest());
             }
 
             if (!stop && (lastBinding != null)) {
@@ -115,36 +117,46 @@ public class AsyncGetHandler implements ResponseListener {
                 pdu.set(0, lastBinding);
                 sendRequest();
             } else {
-                setResult();
+                setResult(null);
             }
-
-        } catch (Exception e) {
-            LOG.error("Error parsing response", e);
+        } catch (Throwable e) {
+            setResult(e);
         }
     }
 
-    private void setResult() {
-        LOG.debug("Setting result");
-        List<Results> resultsArrayList = new ArrayList<>(variableBindings.size());
+    private void storeResult(VariableBinding variableBinding) {
+        variableBindings.add(variableBinding);
 
-        for (VariableBinding variableBinding : variableBindings) {
-            ResultsBuilder resultsBuilder = new ResultsBuilder();
+        ResultsBuilder resultsBuilder = new ResultsBuilder();
 
-            String oidString = variableBinding.getOid().toString();
-            String val = variableBinding.getVariable().toString();
+        String oidString = variableBinding.getOid().toString();
+        String val = variableBinding.getVariable().toString();
 
-            resultsBuilder.setOid(oidString).setValue(val);
-            resultsArrayList.add(resultsBuilder.build());
-        }
+        resultsBuilder.setOid(oidString).setValue(val);
+        resultsArrayList.add(resultsBuilder.build());
+    }
 
-        SnmpGetOutputBuilder getOutputBuilder = new SnmpGetOutputBuilder();
-        getOutputBuilder.setResults(resultsArrayList);
+    private void setResult(Throwable e) {
+        boolean success = (e == null);
+        LOG.info("Setting result, success=" + success);
 
-        RpcResultBuilder<SnmpGetOutput> rpcResultBuilder = RpcResultBuilder.success();
+        SnmpGetOutputBuilder getOutputBuilder = new SnmpGetOutputBuilder().setResults(resultsArrayList);
+
+        RpcResultBuilder<SnmpGetOutput> rpcResultBuilder = RpcResultBuilder.status(success);
         rpcResultBuilder.withResult(getOutputBuilder.build());
-
+        if (e != null) {
+            rpcResultBuilder.withError(getErrorType(e), e.getClass().getSimpleName() + " - see error logs for details");
+            listSettableFuture.setException(e);
+        }
         rpcSettableFuture.set(rpcResultBuilder.build());
         listSettableFuture.set(variableBindings);
+    }
+
+    private ErrorType getErrorType(Throwable e) {
+        if (e instanceof TimeoutException || e instanceof IOException ) {
+            return ErrorType.TRANSPORT;
+        }
+        return ErrorType.APPLICATION;
     }
 
     private void sendRequest() throws IOException {
@@ -172,4 +184,3 @@ public class AsyncGetHandler implements ResponseListener {
         return listSettableFuture;
     }
 }
-
