@@ -12,6 +12,7 @@ module snmp {
     prefix snmp;
     import ietf-inet-types {
         prefix inet;
+        revision-date 2010-09-24;
     }
     import IF-MIB {
         prefix if-mib;
@@ -127,6 +128,42 @@ module snmp {
 
         output {
             uses if-mib:interfaces-group;
+        }
+    }
+
+    rpc get-node-properties {
+        input {
+            leaf ip-address {
+                type inet:ipv4-address;
+            }
+
+            leaf community {
+                type string;
+            }
+
+        }
+
+        output {
+            leaf serial-number {
+                type string;
+            }
+
+            leaf platform-id {
+                 type string;
+            }
+
+            leaf image-name {
+                type string;
+            }
+
+            leaf name {
+                 type string;
+            }
+
+            leaf vendor {
+                 type string;
+            }
+
         }
     }
 
