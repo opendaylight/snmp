@@ -61,11 +61,6 @@
       <version>3.2</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>3.0.8</version>
-    </dependency>
 
     <!-- Testing Dependencies -->
     <dependency>
@@ -89,7 +84,7 @@
         <artifactId>maven-plugin-plugin</artifactId>
         <version>${maven.plugin.version}</version>
         <configuration>
-          <goalPrefix>yang-oid-plugin</goalPrefix>
+          <goalPrefix>yang-oid</goalPrefix>
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
         </configuration>
         <executions>
