@@ -60,7 +60,6 @@
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>${yangtools.version}</version>
                 <executions>
                     <execution>
                         <id>config</id>
@@ -106,7 +105,6 @@
            <plugin>
              <groupId>org.codehaus.mojo</groupId>
              <artifactId>build-helper-maven-plugin</artifactId>
-             <version>1.9.1</version>
              <executions>
                <execution>
                  <id>attach-artifacts</id>
