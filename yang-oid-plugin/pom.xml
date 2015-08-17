@@ -18,7 +18,6 @@
   </parent>
 
   <artifactId>yang-oid</artifactId>
-  <version>1.1.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>yang-oid-Maven Plugin</name>
