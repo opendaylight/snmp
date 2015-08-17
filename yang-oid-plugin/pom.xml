@@ -17,11 +17,11 @@
     <relativePath>../commons/parent</relativePath>
   </parent>
 
-  <artifactId>yang-oid-plugin</artifactId>
+  <artifactId>yang-oid</artifactId>
   <version>1.1.0-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
-  <name>yang-oid-plugin Maven Plugin</name>
+  <name>yang-oid-Maven Plugin</name>
     <description>The SNMP Project of OpenDaylight addresses the need for a southbound plugin that allows applications and controller services to interact with devices using SNMP. The SNMP southbound plugin will allow applications acting as an SNMP Manager to interact with devices that support an SNMP agent.</description>
     <url>https://wiki.opendaylight.org/view/SNMP_Plugin:Main</url>
     <licenses>
@@ -61,11 +61,6 @@
       <version>3.2</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>org.codehaus.plexus</groupId>
-      <artifactId>plexus-utils</artifactId>
-      <version>3.0.8</version>
-    </dependency>
 
     <!-- Testing Dependencies -->
     <dependency>
@@ -89,7 +84,7 @@
         <artifactId>maven-plugin-plugin</artifactId>
         <version>3.4</version>
         <configuration>
-          <goalPrefix>yang-oid-plugin</goalPrefix>
+          <goalPrefix>yang-oid</goalPrefix>
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
         </configuration>
         <executions>
