@@ -46,7 +46,6 @@
             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <version>${yangtools.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -94,7 +93,6 @@
         <dependency>
             <groupId>org.opendaylight.yangtools.model</groupId>
             <artifactId>ietf-yang-types</artifactId>
-            <version>${ietf-yang-types.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
