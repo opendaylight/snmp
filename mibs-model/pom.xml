@@ -43,31 +43,9 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
             </plugin>
-            <plugin>
+             <plugin>
                 <groupId>org.opendaylight.yangtools</groupId>
                 <artifactId>yang-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate-sources</goal>
-                        </goals>
-                        <configuration>
-                            <!-- directory containing yang files to parse and generate code -->
-                            <yangFilesRootDir>src/main/yang</yangFilesRootDir>
-                            <codeGenerators>
-                                <generator>
-                                    <codeGeneratorClass>
-                                        org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
-                                    </codeGeneratorClass>
-                                    <!-- directory into which generated files will be placed -->
-                                    <outputBaseDir>${salGeneratorPath}</outputBaseDir>
-                                </generator>
-                            </codeGenerators>
-                            <!-- if true, plugin will search for yang files also in dependent projects -->
-                            <inspectDependencies>true</inspectDependencies>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.opendaylight.snmp</groupId>
