@@ -48,8 +48,6 @@
         <mdsal.version>1.3.0-SNAPSHOT</mdsal.version>
         <config.version>0.4.0-SNAPSHOT</config.version>
         <apache.servicemix.version>2.3.1_1</apache.servicemix.version>
-        <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
-        <salGeneratorPath>target/generated-sources/sal</salGeneratorPath>
         <snmp.impl.configfile>snmp-impl.xml</snmp.impl.configfile>
     </properties>
 
@@ -62,11 +60,6 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-            <dependency>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.0</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -76,7 +69,35 @@
                 <plugin>
                     <groupId>org.opendaylight.yangtools</groupId>
                     <artifactId>yang-maven-plugin</artifactId>
-                    <version>${yangtools.version}</version>
+                     <executions>
+                        <execution>
+                            <goals>
+                                <goal>generate-sources</goal>
+                            </goals>
+                            <configuration>
+                                <!-- directory containing yang files to parse and generate code -->
+                                <yangFilesRootDir>src/main/yang</yangFilesRootDir>
+                                <codeGenerators>
+                                    <generator>
+                                        <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
+                                        <outputBaseDir>target/generated-sources/config</outputBaseDir>
+                                        <additionalConfiguration>
+                                            <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
+                                        </additionalConfiguration>
+                                    </generator>
+                                    <generator>
+                                        <codeGeneratorClass>
+                                            org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                        </codeGeneratorClass>
+                                        <!-- directory into which generated files will be placed -->
+                                        <outputBaseDir>target/generated-sources/sal</outputBaseDir>
+                                    </generator>
+                                </codeGenerators>
+                                <!-- if true, plugin will search for yang files also in dependent projects -->
+                                <inspectDependencies>true</inspectDependencies>
+                            </configuration>
+                        </execution>
+                    </executions>
                     <dependencies>
                         <dependency>
                             <groupId>org.opendaylight.yangtools</groupId>
@@ -85,60 +106,40 @@
                             <type>jar</type>
                         </dependency>
                         <dependency>
-                            <groupId>org.osgi</groupId>
-                            <artifactId>org.osgi.core</artifactId>
-                            <version>${osgi.core.version}</version>
-                            </dependency>
+                            <groupId>org.opendaylight.controller</groupId>
+                            <artifactId>yang-jmx-generator-plugin</artifactId>
+                            <version>${config.version}</version>
+                        </dependency>
                     </dependencies>
                 </plugin>
-            </plugins>
-            </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <configuration>
-                    <includes>
-                        <include>org.opendaylight.snmp.*</include>
-                    </includes>
-                    <excludes>
-                        <exclude>**/*HelpMojo.*</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>pre-test</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>post-test</id>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <phase>test</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <failOnError>false</failOnError>
-                    <onlyAnalyze>org.opendaylight.snmp.*</onlyAnalyze>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>analyze-compile</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <configuration>
+                        <includes>
+                            <include>org.opendaylight.snmp.*</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/*HelpMojo.*</exclude>
+                        </excludes>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>pre-test</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>post-test</id>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                            <phase>test</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+           </plugins>
+        </pluginManagement>
     </build>
 </project>
