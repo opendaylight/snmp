@@ -18,12 +18,9 @@
     <feature name='odl-snmp-plugin' version='${project.version}' description='OpenDaylight :: snmp-plugin :: SNMP '>
         <feature version='${yangtools.version}'>odl-yangtools-models</feature>
         <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
-
-        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.snmp4j/${apache.servicemix.version}</bundle>
-        <bundle>mvn:org.opendaylight.snmp/mibs-model/${project.version}</bundle>
-        <bundle>mvn:org.opendaylight.snmp/snmp/${project.version}</bundle>
-
-        <configfile finalname="${config.configfile.directory}/${snmp.impl.configfile}">mvn:org.opendaylight.snmp/snmp/${project.version}/xml/config</configfile>
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.snmp4j/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.snmp/mibs-model/{{VERSION}}</bundle>
+        <bundle>mvn:org.opendaylight.snmp/snmp/{{VERSION}}</bundle>
+        <configfile finalname="${config.configfile.directory}/${snmp.impl.configfile}">mvn:org.opendaylight.snmp/snmp/{{VERSION}}/xml/config</configfile>
     </feature>
-
 </features>
