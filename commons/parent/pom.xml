@@ -67,6 +67,13 @@
 
     <dependencyManagement>
         <dependencies>
+             <dependency>
+                <groupId>org.opendaylight.yangtools</groupId>
+                <artifactId>yangtools-artifacts</artifactId>
+                <version>${yangtools.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
             <!-- Test Stuff -->
             <dependency>
                <groupId>org.opendaylight.odlparent</groupId>
@@ -153,11 +160,4 @@
             </plugin>
         </plugins>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 </project>
