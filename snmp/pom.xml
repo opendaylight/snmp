@@ -91,19 +91,16 @@
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>config-api</artifactId>
-          <version>${config.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-binding-config</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
 
         <dependency>
           <groupId>org.opendaylight.controller</groupId>
           <artifactId>sal-binding-api</artifactId>
-          <version>${mdsal.version}</version>
         </dependency>
 
         <dependency>
@@ -115,7 +112,6 @@
         <dependency>
             <groupId>org.opendaylight.snmp</groupId>
             <artifactId>mibs-model</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -151,13 +147,11 @@
        <dependency>
            <groupId>junit</groupId>
            <artifactId>junit</artifactId>
-           <scope>test</scope>
         </dependency>
 
        <dependency>
            <groupId>org.mockito</groupId>
            <artifactId>mockito-all</artifactId>
-           <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -70,6 +70,13 @@
             </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
+                <artifactId>mdsal-artifacts</artifactId>
+                <version>${mdsal.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.opendaylight.controller</groupId>
                 <artifactId>config-artifacts</artifactId>
                 <version>${config.version}</version>
                 <scope>import</scope>
@@ -84,6 +91,7 @@
                 <plugin>
                     <groupId>org.opendaylight.yangtools</groupId>
                     <artifactId>yang-maven-plugin</artifactId>
+                    <version>${yangtools.version}</version>
                      <executions>
                         <execution>
                             <goals>
