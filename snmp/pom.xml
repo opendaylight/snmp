@@ -12,9 +12,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.opendaylight.snmp</groupId>
-        <artifactId>commons.parent</artifactId>
+        <artifactId>snmp-parent</artifactId>
         <version>1.1.0-SNAPSHOT</version>
-        <relativePath>../commons/parent</relativePath>
+        <relativePath>../parent</relativePath>
     </parent>
     <artifactId>snmp</artifactId>
     <packaging>bundle</packaging>

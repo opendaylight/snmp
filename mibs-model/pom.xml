@@ -10,13 +10,14 @@
 
     <parent>
         <groupId>org.opendaylight.snmp</groupId>
-        <artifactId>commons.parent</artifactId>
+        <artifactId>snmp-parent</artifactId>
         <version>1.1.0-SNAPSHOT</version>
-        <relativePath>../commons/parent</relativePath>
+        <relativePath>../parent</relativePath>
     </parent>
     <artifactId>mibs-model</artifactId>
-    <packaging>bundle</packaging>
     <description>The SNMP Project of OpenDaylight addresses the need for a southbound plugin that allows applications and controller services to interact with devices using SNMP. The SNMP southbound plugin will allow applications acting as an SNMP Manager to interact with devices that support an SNMP agent.</description>
+    <packaging>bundle</packaging>
+    <name>${project.artifactId}</name>
     <url>https://wiki.opendaylight.org/view/SNMP_Plugin:Main</url>
     <licenses>
         <license>
