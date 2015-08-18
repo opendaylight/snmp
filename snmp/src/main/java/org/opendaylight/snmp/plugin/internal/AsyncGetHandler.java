@@ -5,11 +5,15 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.snmp.plugin.internal;
 
+import static org.opendaylight.snmp.plugin.internal.SNMPImpl.DEFAULT_COMMUNITY;
+import static org.opendaylight.snmp.plugin.internal.SNMPImpl.MAXREPETITIONS;
 import com.google.common.util.concurrent.SettableFuture;
-
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutputBuilder;
@@ -30,15 +34,6 @@ import org.snmp4j.event.ResponseListener;
 import org.snmp4j.smi.Integer32;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.VariableBinding;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeoutException;
-
-import static org.opendaylight.snmp.plugin.internal.SNMPImpl.DEFAULT_COMMUNITY;
-import static org.opendaylight.snmp.plugin.internal.SNMPImpl.MAXREPETITIONS;
-
 
 public class AsyncGetHandler implements ResponseListener {
     private static final Logger LOG = LoggerFactory.getLogger(AsyncGetHandler.class);

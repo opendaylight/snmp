@@ -5,9 +5,16 @@
  * terms of the Eclipse Public License v1.0 which accompanies this distribution,
  * and is available at http://www.eclipse.org/legal/epl-v10.html
  */
-
 package org.opendaylight.snmp.plugin.internal;
 
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
 import org.opendaylight.snmp.OID;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ieee.types.rev080522.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev100924.Ipv4Address;
@@ -30,15 +37,6 @@ import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.TimeTicks;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
-
-import java.lang.reflect.Method;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
 
 public class MibTable<T> {
     private static final Logger LOG = LoggerFactory.getLogger(MibTable.class);
@@ -256,5 +254,4 @@ public class MibTable<T> {
             this.baseOID = baseOID;
         }
     }
-
 }

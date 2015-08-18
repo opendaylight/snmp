@@ -12,7 +12,7 @@ module yang-smi {
         "Martin Bjorklund (Editor) <mbj@tail-f.com>";
 
     description
-        "This module contains extensions for dealing with 
+        "This module contains extensions for dealing with
          SMIv2 modules.";
 
     revision 2008-03-20 {

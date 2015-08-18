@@ -7,7 +7,7 @@
  */
 module snmp {
     yang-version 1;
-    
+
     namespace "urn:opendaylight:snmp";
     prefix snmp;
     import ietf-inet-types {
@@ -22,7 +22,7 @@ module snmp {
     revision "2014-09-22" {
         description "Initial revision of cmts snmp model";
     }
-    
+
     identity snmp-impl {
         base config:module-type;
         config:java-name-prefix SNMPImpl;
@@ -77,7 +77,7 @@ module snmp {
             }
         }
     }
-    
+
     augment "/config:modules/config:module/config:configuration" {
         case snmp-impl {
             when "/config:modules/config:module/config:type = 'snmp-impl'";

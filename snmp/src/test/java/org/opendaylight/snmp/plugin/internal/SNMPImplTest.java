@@ -1,5 +1,21 @@
 package org.opendaylight.snmp.plugin.internal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -33,25 +49,6 @@ import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
-
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 
 public class SNMPImplTest {
     private static final String SYS_OID_REQUEST = "1.3.6.1.2.1.1.2.0";
@@ -88,6 +85,7 @@ public class SNMPImplTest {
         // matchers we check that the parameters passed to snmp.send are as
         // expected
         doAnswer(new Answer<Object>() {
+            @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
                 callback.onResponse(event);
@@ -104,7 +102,7 @@ public class SNMPImplTest {
                     return true;
                 }
                 return false;
-            }}), argThat(new ArgumentMatcher<Target>(){
+        }}), argThat(new ArgumentMatcher<Target>(){
                 @Override
                 public boolean matches(Object argument) {
                     if (argument instanceof Target) {
@@ -157,6 +155,7 @@ public class SNMPImplTest {
         // SET response - because SET is async, use mockito doAnswer to
         // call the ResponseListener callback
         doAnswer(new Answer<Object>() {
+            @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
                 callback.onResponse(event);
@@ -263,6 +262,7 @@ public class SNMPImplTest {
         // Set up the response for the mock snmp4j
         // This is responsible for calling the onResponse() callback for SNMP messages
         doAnswer(new Answer<Object>() {
+            @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 PDU requestPDU = (PDU) invocation.getArguments()[0];
                 ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
@@ -346,9 +346,9 @@ public class SNMPImplTest {
         // create response PDU
         PDU responsePdu = new PDU();
         for (int i = startWith; i <= endWith; i++) {
-          OID responseOid = new OID(SYS_OID_REQUEST + "." + i);
-          Variable variable = new OctetString(SYS_OID_RESPONSE);
-          responsePdu.add(new VariableBinding(responseOid, variable));
+            OID responseOid = new OID(SYS_OID_REQUEST + "." + i);
+            Variable variable = new OctetString(SYS_OID_RESPONSE);
+            responsePdu.add(new VariableBinding(responseOid, variable));
         }
         responsePdu.setMaxRepetitions(10000);
         responsePdu.setNonRepeaters(0);
@@ -392,6 +392,7 @@ public class SNMPImplTest {
 
     private RpcResult<SnmpGetOutput> bulkTest(final int bindingsPerCall, final int stopWithBinding, final int timeoutAfterBinding) throws IOException, InterruptedException, ExecutionException {
         doAnswer(new Answer<Object>() {
+            @Override
             public Object answer(InvocationOnMock invocation) throws UnknownHostException, InterruptedException {
                 PDU pdu = (PDU)invocation.getArguments()[0];
                 OID oid = pdu.getVariableBindings().get(0).getOid();

@@ -8,6 +8,7 @@
 package org.opendaylight.snmp.plugin.internal;
 
 import com.google.common.util.concurrent.SettableFuture;
+import java.io.IOException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -27,8 +28,6 @@ import org.snmp4j.smi.UnsignedInteger32;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 
-import java.io.IOException;
-
 public class AsyncSetHandler implements ResponseListener {
     private static final Logger LOG = LoggerFactory.getLogger(AsyncSetHandler.class);
     private SettableFuture<RpcResult<Void>> rpcResultSettableFuture;
@@ -37,7 +36,6 @@ public class AsyncSetHandler implements ResponseListener {
     private Target target;
     private OID oid;
     private PDU pdu;
-
 
     public AsyncSetHandler(SnmpSetInput input, Snmp snmp) {
         snmp4j = snmp;
