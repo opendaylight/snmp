@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_031a6317",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 3285
+      },
+      "writtenOn": "2015-08-18T03:57:51Z",
+      "side": 1,
+      "message": "Use the exception (if any) from getNetConfDeviceInfoUsingSnmp() so we can set the appropriate error message on the response",
+      "revId": "db54104086d74fc519e3272bc72d292bf9064806",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_23175fef",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 3285
+      },
+      "writtenOn": "2015-08-18T03:57:51Z",
+      "side": 1,
+      "message": "See the comment above.",
+      "revId": "db54104086d74fc519e3272bc72d292bf9064806",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
