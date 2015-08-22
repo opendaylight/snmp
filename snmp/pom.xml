@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.opendaylight.snmp</groupId>
         <artifactId>commons.parent</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1-Lithium-SR1</version>
         <relativePath>../commons/parent</relativePath>
     </parent>
     <artifactId>snmp</artifactId>

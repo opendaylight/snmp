@@ -13,12 +13,12 @@
   <parent>
     <groupId>org.opendaylight.snmp</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1-Lithium-SR1</version>
     <relativePath>../commons/parent</relativePath>
   </parent>
 
   <artifactId>yang-oid-plugin</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1-Lithium-SR1</version>
   <packaging>maven-plugin</packaging>
 
   <name>yang-oid-plugin Maven Plugin</name>
