@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a79b1b5_ed485f2f",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 3285
+      },
+      "writtenOn": "2015-08-24T15:20:58Z",
+      "side": 1,
+      "message": "Is there a way to keep this async?\n\nSomething along the lines of returning a list of futures here, and adding a listener to set the values on the RPC in the method above.",
+      "revId": "c6331b7933513974cfc209053ec786b51b7179ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_ade4a73b",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 3285
+      },
+      "writtenOn": "2015-08-24T15:20:58Z",
+      "side": 1,
+      "message": "you can log the entire exception with \u0027LOG.warn(\"Failed to get the node properties\", e)\u0027",
+      "revId": "c6331b7933513974cfc209053ec786b51b7179ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_0df4bbf0",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 3285
+      },
+      "writtenOn": "2015-08-24T15:20:58Z",
+      "side": 1,
+      "message": "you can just use \u0027throw e\u0027 here.\nThat way the exception type isn\u0027t lost and replaced with a generic Exception()",
+      "revId": "c6331b7933513974cfc209053ec786b51b7179ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
