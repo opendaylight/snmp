@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_bf627bab",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1108
+      },
+      "writtenOn": "2015-08-28T23:19:12Z",
+      "side": 1,
+      "message": "I didnt quite get it, is there similar example I can take a look? or should we do that as separate enhancement commit afterwards?",
+      "parentUuid": "3a79b1b5_ed485f2f",
+      "revId": "c6331b7933513974cfc209053ec786b51b7179ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_ade4a73b",
         "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "3a79b1b5_ff50f3d5",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1108
+      },
+      "writtenOn": "2015-08-28T23:19:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a79b1b5_ade4a73b",
+      "revId": "c6331b7933513974cfc209053ec786b51b7179ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a79b1b5_0df4bbf0",
         "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2015-08-24T15:20:58Z",
       "side": 1,
       "message": "you can just use \u0027throw e\u0027 here.\nThat way the exception type isn\u0027t lost and replaced with a generic Exception()",
+      "revId": "c6331b7933513974cfc209053ec786b51b7179ab",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a79b1b5_9f5f7fe5",
+        "filename": "snmp/src/main/java/org/opendaylight/snmp/plugin/internal/SNMPImpl.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1108
+      },
+      "writtenOn": "2015-08-28T23:19:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a79b1b5_0df4bbf0",
       "revId": "c6331b7933513974cfc209053ec786b51b7179ab",
       "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
       "unresolved": false
