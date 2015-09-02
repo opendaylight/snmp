@@ -16,7 +16,7 @@
 
     <!-- utility jar/bundles common to several features -->
     <feature name='odl-snmp-plugin' version='${project.version}' description='OpenDaylight :: snmp-plugin :: SNMP '>
-        <feature version='${yangtools.version}'>odl-yangtools-models</feature>
+        <feature version='${yangtools.version}'>odl-mdsal-models</feature>
         <feature version='${mdsal.version}'>odl-mdsal-broker</feature>
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.snmp4j/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.snmp/mibs-model/{{VERSION}}</bundle>
