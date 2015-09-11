@@ -15,14 +15,20 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommunityTarget;
@@ -38,8 +44,10 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class SNMPImpl implements SnmpService, AutoCloseable {
@@ -47,9 +55,32 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     static final String DEFAULT_COMMUNITY = "public";
     private Snmp snmp;
     static final Integer SNMP_LISTEN_PORT = 161;
-    static final int RETRIES = 1;
-    static final int TIMEOUT = 500;
+    static final int RETRIES = 5;
+    static final int TIMEOUT = 1000;
     static final int MAXREPETITIONS = 10000;
+
+    // enum representing node's properties such as image name, serial number etc
+    public enum FieldEnum {
+
+        NAME(".1.3.6.1.2.1.1.5.0"),
+        VENDOR(".1.3.6.1.2.1.47.1.1.1.1.12.24555730"),
+        PLATFORM_ID(".1.3.6.1.2.1.47.1.1.1.1.13.24555730"),
+        SERIAL_NUMBER(".1.3.6.1.2.1.47.1.1.1.1.11.24555730"),
+        IMAGE_NAME(".1.3.6.1.2.1.1.1.0");
+
+        private String objectId;
+
+        FieldEnum(String objId) {
+            this.objectId = objId;
+        }
+
+        public String getObjectId() {
+            return objectId;
+        }
+    }
+
+    ;
+
 
     private final RpcProviderRegistry rpcProviderRegistery;
     private final BindingAwareBroker.RpcRegistration<SnmpService> rpcRegistration;
@@ -95,7 +126,9 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
     @Override
     public Future<RpcResult<SnmpGetOutput>> snmpGet(SnmpGetInput input) {
-        LOG.info("Sending " + input.getGetType() + " SNMP request for host: " + input.getIpAddress() + " for OID: " + input.getOid() + " Community: " + input.getCommunity());
+        LOG.info("Sending " + input.getGetType() + " SNMP request for host: " +
+                input.getIpAddress() + " for OID: " + input.getOid()
+                + " Community: " + input.getCommunity());
         AsyncGetHandler getHandler = new AsyncGetHandler(input, snmp);
         return getHandler.getRpcResponse();
     }
@@ -152,4 +185,83 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         }
     }
 
+
+    /**
+     * Gets Node properties such as image, serial number, platform, vendor
+     * @param input
+     * @return
+     */
+    @Override
+    public Future<RpcResult<GetNodePropertiesOutput>> getNodeProperties(final GetNodePropertiesInput input) {
+        LOG.debug("Received the input ip address: " + input.getIpAddress() + " and the community: " + input.getCommunity());
+        SettableFuture<RpcResult<GetNodePropertiesOutput>> nodePropertiesSettableFuture = SettableFuture.create();
+        try {
+            Map<FieldEnum, String> fieldsMap = getNetConfDeviceInfoUsingSnmp(input);
+
+
+            GetNodePropertiesOutputBuilder getNodePropertiesOutputBuilder = new GetNodePropertiesOutputBuilder();
+
+            String imageName = fieldsMap.get(FieldEnum.IMAGE_NAME);
+            String name = fieldsMap.get(FieldEnum.NAME);
+            String serialNumber = fieldsMap.get(FieldEnum.SERIAL_NUMBER);
+            String platformId = fieldsMap.get(FieldEnum.PLATFORM_ID);
+            String vendor = fieldsMap.get(FieldEnum.VENDOR);
+
+            getNodePropertiesOutputBuilder.setImageName(imageName);
+            getNodePropertiesOutputBuilder.setName(name);
+            getNodePropertiesOutputBuilder.setSerialNumber(serialNumber);
+            getNodePropertiesOutputBuilder.setPlatformId(platformId);
+            getNodePropertiesOutputBuilder.setVendor(vendor);
+
+            LOG.debug("Received image name is: " + imageName +" vendor is: " + vendor + " platform id is: "
+                    + platformId + " serial number is: " + serialNumber + " and name is: " + name +
+                    " for the ip-address: " + input.getIpAddress());
+
+            RpcResultBuilder<GetNodePropertiesOutput> rpcResultBuilder = RpcResultBuilder.success();
+            rpcResultBuilder.withResult(getNodePropertiesOutputBuilder.build());
+            RpcResult<GetNodePropertiesOutput> rpcResult;
+            rpcResult = rpcResultBuilder.build();
+            nodePropertiesSettableFuture.set(rpcResult);
+        }catch (Exception e){
+            RpcResultBuilder<GetNodePropertiesOutput> errorOutput = RpcResultBuilder.failed();
+            errorOutput.withError(RpcError.ErrorType.APPLICATION, "Exception when getting node properties"+ e.getCause());
+            nodePropertiesSettableFuture.set(errorOutput.build());
+
+        }
+        return nodePropertiesSettableFuture;
+    }
+
+    protected Map<FieldEnum, String> getNetConfDeviceInfoUsingSnmp(final GetNodePropertiesInput input) throws Exception{
+
+        Map<FieldEnum, String> fieldsMap = new HashMap<FieldEnum, String>();
+
+        SnmpGetInputBuilder snmpGetInputBuilder = new SnmpGetInputBuilder();
+        snmpGetInputBuilder.setCommunity(input.getCommunity());
+        snmpGetInputBuilder.setIpAddress(input.getIpAddress());
+        snmpGetInputBuilder.setGetType(SnmpGetType.GET);
+        AsyncGetHandler getHandler;
+        Future<RpcResult<SnmpGetOutput>> snmpGetOutput;
+
+        for (FieldEnum field : FieldEnum.values()) {
+            snmpGetInputBuilder.setOid(field.getObjectId());
+            getHandler = new AsyncGetHandler(snmpGetInputBuilder.build(), snmp);
+            snmpGetOutput = getHandler.getRpcResponse();
+
+            try {
+                RpcResult<SnmpGetOutput> output = snmpGetOutput.get();
+                if (output != null && output.isSuccessful()) {
+                    SnmpGetOutput rpcResult = output.getResult();
+                    if (rpcResult!=null && !rpcResult.getResults().isEmpty()) {
+                        fieldsMap.put(field, rpcResult.getResults().get(0).getValue());
+                    }
+                }
+
+
+            } catch (InterruptedException | ExecutionException e) {
+                LOG.warn("Failed to get the node properties.", e);
+                throw e;
+            }
+        }
+        return fieldsMap;
+    }
 }
