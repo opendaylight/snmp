@@ -58,6 +58,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2.snmpv2.tc.rev990401.DisplayString;
 
 
 public class SNMPImplTest {
@@ -272,7 +273,7 @@ public class SNMPImplTest {
             IfEntryBuilder ifEntryBuilder = new IfEntryBuilder()
                     .setIfIndex(new InterfaceIndex(i + 1))
                     .setIfAdminStatus(IfEntry.IfAdminStatus.forValue(i % 3))
-                    .setIfDescr(String.format("Interface %s", i))
+                    .setIfDescr(new DisplayString(String.format("Interface %s", i)))
                     .setIfInErrors(new Counter32(99l-i));
             testInterfaceEntries.add(ifEntryBuilder.build());
         }
@@ -305,7 +306,7 @@ public class SNMPImplTest {
                         val = new Integer32(i % 3);
 
                     } else if (requestOID.equals(ifDescrOID)) {
-                        val = new OctetString(testIfEntry.getIfDescr());
+                        val = new OctetString(testIfEntry.getIfDescr().toString());
 
                     } else if (requestOID.equals(ifInErrorsOID)) {
                         val = new org.snmp4j.smi.Counter32(testIfEntry.getIfInErrors().getValue());
