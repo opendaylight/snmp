@@ -12,13 +12,13 @@
   <parent>
       <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>odlparent</artifactId>
-      <version>1.5.2-Lithium-SR2</version>
+      <version>1.5.3-SNAPSHOT</version>
       <relativePath/>
   </parent>
 
     <groupId>org.opendaylight.snmp</groupId>
     <artifactId>commons.parent</artifactId>
-    <version>1.0.2-Lithium-SR2</version>
+    <version>1.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>The SNMP Project of OpenDaylight addresses the need for a southbound plugin that allows applications and controller services to interact with devices using SNMP. The SNMP southbound plugin will allow applications acting as an SNMP Manager to interact with devices that support an SNMP agent.</description>
@@ -43,12 +43,12 @@
     </scm>
 
     <properties>
-        <yangtools.version>0.7.2-Lithium-SR2</yangtools.version>
-        <ietf-yang-types.version>2010.09.24.7.2-Lithium-SR2</ietf-yang-types.version>
-        <ietf-inet-types.version>2010.09.24.7.2-Lithium-SR2</ietf-inet-types.version>
-        <controller.version>1.5.2-Lithium-SR2</controller.version>
-        <mdsal.version>1.2.2-Lithium-SR2</mdsal.version>
-        <config.version>0.3.2-Lithium-SR2</config.version>
+        <yangtools.version>0.7.3-SNAPSHOT</yangtools.version>
+        <ietf-yang-types.version>2010.09.24.7.3-SNAPSHOT</ietf-yang-types.version>
+        <ietf-inet-types.version>2010.09.24.7.3-SNAPSHOT</ietf-inet-types.version>
+        <controller.version>1.5.3-SNAPSHOT</controller.version>
+        <mdsal.version>1.2.3-SNAPSHOT</mdsal.version>
+        <config.version>0.3.3-SNAPSHOT</config.version>
         <apache.servicemix.version>2.3.1_1</apache.servicemix.version>
 
         <jmxGeneratorPath>target/generated-sources/config</jmxGeneratorPath>
@@ -62,7 +62,7 @@
         <sonar.jacoco.reportPath>target/code-coverage/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.jacoco.itReportPath>target/code-coverage/jacoco-it.exec</sonar.jacoco.itReportPath>
         <sonar.profile>Sonar way with Findbugs</sonar.profile>
-        <features.test.version>1.5.2-Lithium-SR2</features.test.version>
+        <features.test.version>1.5.3-SNAPSHOT</features.test.version>
     </properties>
 
     <dependencyManagement>
