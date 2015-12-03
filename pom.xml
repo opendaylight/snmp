@@ -12,12 +12,12 @@
     <parent>
         <groupId>org.opendaylight.snmp</groupId>
         <artifactId>commons.parent</artifactId>
-        <version>1.0.3-Lithium-SR3</version>
+        <version>1.0.4-SNAPSHOT</version>
         <relativePath>commons/parent</relativePath>
     </parent>
 
     <artifactId>snmp-distribution</artifactId>
-    <version>1.0.3-Lithium-SR3</version>
+    <version>1.0.4-SNAPSHOT</version>
     <name>snmp</name> <!-- Used by Sonar to set project name -->
     <packaging>pom</packaging>
     <description>The SNMP Project of OpenDaylight addresses the need for a southbound plugin that allows applications and controller services to interact with devices using SNMP. The SNMP southbound plugin will allow applications acting as an SNMP Manager to interact with devices that support an SNMP agent.</description>
