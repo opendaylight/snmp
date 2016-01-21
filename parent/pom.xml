@@ -43,7 +43,7 @@
     </scm>
 
     <properties>
-        <yangtools.version>0.9.0-SNAPSHOT</yangtools.version>
+        <yangtools.version>1.0.0-SNAPSHOT</yangtools.version>
         <controller.version>1.7.0-SNAPSHOT</controller.version>
         <mdsal.version>1.4.0-SNAPSHOT</mdsal.version>
         <mdsal.java.binding.version>0.9.0-SNAPSHOT</mdsal.java.binding.version>
