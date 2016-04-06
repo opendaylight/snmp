@@ -20,6 +20,7 @@ import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.InterfaceIndex;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.InterfaceIndexOrZero;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2.inet.address.mib.rev050204.InetAddress;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2.snmpv2.tc.rev990401.DisplayString;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
 import org.slf4j.Logger;
@@ -193,6 +194,9 @@ public class MibTable<T> {
                 } else if (objectType.equals(Timeticks.class)) {
                     TimeTicks timeTicks = (TimeTicks) variable;
                     setObject = new TimeTicks(timeTicks.toMilliseconds());
+
+                } else if (objectType.equals(DisplayString.class)) {
+                    setObject = new DisplayString(variable.toString());
                 }
 
                 // Get the index of from the OID
