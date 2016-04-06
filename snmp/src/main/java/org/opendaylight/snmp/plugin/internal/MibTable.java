@@ -176,7 +176,10 @@ public class MibTable<T> {
                     setObject = ipAddress.getInetAddress();
 
                 } else if (Enum.class.isAssignableFrom(objectType)) {
-                    setObject = objectType.getEnumConstants()[variable.toInt()];
+                    @SuppressWarnings("unchecked")
+                    Method forValue = objectType.getMethod("forValue", int.class);
+                    forValue.setAccessible(true);
+                    setObject = forValue.invoke(null, variable.toInt());
 
                 } else if (objectType.equals(PhysAddress.class)) {
                     setObject = new PhysAddress(variable.toString());
