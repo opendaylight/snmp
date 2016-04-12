@@ -1,0 +1,7 @@
+Verified+1: jenkins-releng <jenkins-releng@opendaylight.org>
+Code-Review+2: Adam Dierkens <adam@dierkens.com>
+Submitted-by: Adam Dierkens <adam@dierkens.com>
+Submitted-at: Tue, 12 Apr 2016 22:12:55 +0000
+Reviewed-on: https://git.opendaylight.org/gerrit/36343
+Project: snmp
+Branch: refs/heads/stable/beryllium
