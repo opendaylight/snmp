@@ -19,7 +19,7 @@ module IF-MIB {
   import SNMPv2-TC      { prefix "smiv2"; }
   import ietf-yang-types {
       prefix "yang";
-      revision-date "2010-09-24";
+      revision-date "2013-07-15";
   }
 
   /*** META INFORMATION ***/

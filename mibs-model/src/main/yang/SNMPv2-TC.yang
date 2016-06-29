@@ -17,7 +17,7 @@ module SNMPv2-TC {
    import yang-smi   { prefix "smi"; }
   import ietf-yang-types {
       prefix "yang";
-      revision-date "2010-09-24";
+      revision-date "2013-07-15";
   }
 
    /*** META INFORMATION ***/
