@@ -22,6 +22,5 @@
         <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.snmp4j/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.snmp/mibs-model/{{VERSION}}</bundle>
         <bundle>mvn:org.opendaylight.snmp/snmp/{{VERSION}}</bundle>
-        <configfile finalname="${config.configfile.directory}/${snmp.impl.configfile}">mvn:org.opendaylight.snmp/snmp/{{VERSION}}/xml/config</configfile>
     </feature>
 </features>

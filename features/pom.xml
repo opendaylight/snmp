@@ -48,7 +48,6 @@
         <config.version>0.6.0-SNAPSHOT</config.version>
         <apache.servicemix.version>2.3.1_1</apache.servicemix.version>
         <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
-        <snmp.impl.configfile>snmp-impl.xml</snmp.impl.configfile>
     </properties>
 
   <dependencies>
@@ -94,12 +93,6 @@
       <artifactId>snmp</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>snmp</artifactId>
-      <version>${project.version}</version>
-      <classifier>config</classifier>
-      <type>xml</type>
-    </dependency>
+
   </dependencies>
 </project>
