@@ -26,6 +26,7 @@ import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UnsignedInteger32;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.smi.IpAddress;
 
 import java.io.IOException;
 
@@ -77,7 +78,9 @@ public class AsyncSetHandler implements ResponseListener {
         VariableBinding variableBinding = null;
 
         if (variable instanceof OctetString) {
+            variableBinding = new VariableBinding(oid, new IpAddress(value));
 
+        } else if (variable instanceof IpAddress) {
             try {
                 Integer intValue = Integer.parseInt(value);
                 variableBinding = new VariableBinding(oid, new Integer32(intValue));
