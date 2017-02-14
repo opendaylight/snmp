@@ -9,6 +9,8 @@ package org.opendaylight.snmp.plugin.internal;
 
 import com.google.common.util.concurrent.SettableFuture;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpValueType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.set.input.Data;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -26,6 +28,9 @@ import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UnsignedInteger32;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.smi.IpAddress;
+import org.snmp4j.smi.Counter32;
+import org.snmp4j.smi.Gauge32;
 
 import java.io.IOException;
 
@@ -49,10 +54,47 @@ public class AsyncSetHandler implements ResponseListener {
         }
 
         target = SNMPImpl.getTargetForIp(input.getIpAddress(), community);
-        oid  = new OID(input.getOid());
         pdu = new PDU();
-        pdu.add(new VariableBinding(oid, new OctetString(input.getValue())));
         pdu.setType(PDU.SET);
+
+        // If oid-value pair is set
+        if (input.getOid() != null && input.getValue() != null) {
+            oid = new OID(input.getOid());
+            pdu.add(new VariableBinding(oid, new OctetString(input.getValue())));
+
+        // If list of oid-value-type is set
+        } else if (input.getData() != null) {
+            for (Data datum : input.getData()) {
+                pdu.add(new VariableBinding(new OID(datum.getOid()), tranformToType(datum.getType(), datum.getValue())));
+            }
+        }
+    }
+
+    /**
+     * Returns the value casted to appropriate SMI variable based on enum of the interface
+     *
+     * @param type Type defined on the yang interface
+     * @param value String value to be casted to SMI type
+     * @return The value casted to one of the implementations of Variable
+     */
+    private Variable tranformToType(SnmpValueType type, String value) {
+        switch (type){
+            case COUNTER32:
+                return new Counter32(Long.valueOf(value));
+            case COUNTER64:
+                return new Counter64(Long.valueOf(value));
+            case GAUGE32:
+                return new Gauge32(Long.valueOf(value));
+            case INTEGER32:
+                return new Integer32(Integer.valueOf(value));
+            case IPADDRESS:
+                return new IpAddress(value);
+            case UNSIGNEDINTEGER32:
+                return new UnsignedInteger32(Long.valueOf(value));
+            case OCTETSTRING:
+            default:
+                return new OctetString(value);
+        }
     }
 
     private void sendSnmpSet() {
@@ -117,7 +159,8 @@ public class AsyncSetHandler implements ResponseListener {
             if (errorStatus != PDU.noError) {
                 // SET wasn't successful!
 
-                if (errorStatus == PDU.wrongType) {
+                // If request is with oid-value instead of list of oid-value-type
+                if (errorStatus == PDU.wrongType && oid != null && snmpSetInput.getValue() != null) {
                     // Try again with a different type
 
                     try {

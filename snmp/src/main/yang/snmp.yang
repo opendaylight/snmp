@@ -46,6 +46,33 @@ module snmp {
         }
     }
 
+
+    typedef snmp-value-type {
+        type enumeration {
+            enum COUNTER32 {
+                value "1";
+            }
+            enum COUNTER64 {
+                value "2";
+            }
+            enum GAUGE32 {
+                value "3";
+            }
+            enum INTEGER32 {
+                value "4";
+            }
+            enum IPADDRESS {
+                value "5";
+            }
+            enum OCTETSTRING {
+                value "6";
+            }
+            enum UNSIGNEDINTEGER32 {
+                value "7";
+            }
+        }
+    }
+
     rpc snmp-get {
         description "Sends an SNMP get to the specified address";
         input {
@@ -111,6 +138,20 @@ module snmp {
 
             leaf value {
                 type string;
+            }
+
+            list data {
+                leaf oid {
+                    type string;
+                }
+
+                leaf value {
+                    type string;
+                }
+
+                leaf type {
+                    type snmp-value-type;
+                }
             }
         }
     }

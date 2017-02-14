@@ -52,6 +52,7 @@
                             org.opendaylight.snmp.plugin.internal,
                             org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922,
                             org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output
+                            org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.set.input
                         </Export-Package>
                     </instructions>
                 </configuration>
