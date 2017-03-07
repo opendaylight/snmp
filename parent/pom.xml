@@ -126,7 +126,7 @@
                                     </generator>
                                     <generator>
                                         <codeGeneratorClass>
-                                            org.opendaylight.yangtools.maven.sal.api.gen.plugin.CodeGeneratorImpl
+                                            org.opendaylight.mdsal.binding.maven.api.gen.plugin.CodeGeneratorImpl
                                         </codeGeneratorClass>
                                         <!-- directory into which generated files will be placed -->
                                         <outputBaseDir>target/generated-sources/sal</outputBaseDir>
