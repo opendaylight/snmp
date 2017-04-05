@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.opendaylight.snmp</groupId>
         <artifactId>snmp-parent</artifactId>
-        <version>1.2.3-SNAPSHOT</version>
+        <version>1.2.3-Boron-SR3</version>
         <relativePath>../parent</relativePath>
     </parent>
     <artifactId>snmp</artifactId>
