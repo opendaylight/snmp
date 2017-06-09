@@ -12,7 +12,7 @@
   <parent>
       <groupId>org.opendaylight.odlparent</groupId>
       <artifactId>odlparent</artifactId>
-      <version>1.9.0-SNAPSHOT</version>
+      <version>1.8.0-Carbon</version>
       <relativePath/>
   </parent>
 
@@ -44,7 +44,6 @@
 
     <properties>
         <yangtools.version>1.2.0-SNAPSHOT</yangtools.version>
-        <controller.version>1.9.0-SNAPSHOT</controller.version>
         <mdsal.version>1.6.0-SNAPSHOT</mdsal.version>
         <mdsal.java.binding.version>0.11.0-SNAPSHOT</mdsal.java.binding.version>
         <mdsal.model.version>1.6.0-SNAPSHOT</mdsal.model.version>
