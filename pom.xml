@@ -60,6 +60,7 @@
         <!-- Well-known -->
         <module>artifacts</module>
         <module>features</module>
+        <module>karaf</module>
         <module>parent</module>
 
         <!-- SNMP -->
