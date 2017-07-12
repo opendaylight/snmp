@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SNMPImplModule extends org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.AbstractSNMPImplModule {
-	private static final Logger LOG = LoggerFactory.getLogger(SNMPImplModule.class);
 	
 	public SNMPImplModule(org.opendaylight.controller.config.api.ModuleIdentifier identifier, org.opendaylight.controller.config.api.DependencyResolver dependencyResolver) {
         super(identifier, dependencyResolver);
