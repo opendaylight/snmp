@@ -48,15 +48,6 @@ public class MibTable<T> {
     private Map<Integer, T> indexToBuilderObject;
     private Snmp snmp;
 
-    public MibTable(Snmp snmp, Ipv4Address ipv4Address, Class<T> builderClass) {
-        this.snmp = snmp;
-        this.builderClass = builderClass;
-        snmpGetInputBuilder = new SnmpGetInputBuilder()
-                .setCommunity(SNMPImpl.DEFAULT_COMMUNITY)
-                .setIpAddress(ipv4Address)
-                .setGetType(SnmpGetType.GETWALK);
-    }
-
     public MibTable(Snmp snmp, Ipv4Address ipv4Address, String community, Class<T> builderClass) {
         this.snmp = snmp;
         this.builderClass = builderClass;
