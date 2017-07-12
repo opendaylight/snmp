@@ -5,6 +5,7 @@ target-ide
 *.swp
 MANIFEST.MF
 .checkstyle
+.fbExcludeFilterFile
 *.classpath
 *.project
 *.settings

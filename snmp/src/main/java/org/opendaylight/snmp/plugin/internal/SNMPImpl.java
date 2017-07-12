@@ -88,7 +88,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     private static Snmp initSnmp() {
         Snmp snmp = null;
         try {
-            snmp = new Snmp( new DefaultUdpTransportMapping());
+            snmp = new Snmp(new DefaultUdpTransportMapping());
             snmp.listen();
         } catch (IOException e) {
             LOG.warn("Failed to create Snmp instance", e);
@@ -116,9 +116,8 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
     @Override
     public Future<RpcResult<SnmpGetOutput>> snmpGet(SnmpGetInput input) {
-        LOG.info("Sending " + input.getGetType() + " SNMP request for host: " +
-                input.getIpAddress() + " for OID: " + input.getOid()
-                + " Community: " + input.getCommunity());
+        LOG.debug("Sending {} SNMP request for host: {}, OID: {}, Community: {}", input.getGetType(),
+                input.getIpAddress(), input.getOid(), input.getCommunity());
         AsyncGetHandler getHandler = new AsyncGetHandler(input, snmp);
         return getHandler.getRpcResponse();
     }
@@ -135,22 +134,23 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         final SettableFuture<RpcResult<GetInterfacesOutput>> settableFuture = SettableFuture.create();
 
         Runnable nonBlockingPopulateRunnable = () -> {
-            MibTable<IfEntryBuilder> ifEntryBuilderMibTable = new MibTable<>(snmp, getInterfacesInput.getIpAddress(), getInterfacesInput.getCommunity(), IfEntryBuilder.class);
+            MibTable<IfEntryBuilder> ifEntryBuilderMibTable = new MibTable<>(snmp, getInterfacesInput.getIpAddress(),
+                    getInterfacesInput.getCommunity(), IfEntryBuilder.class);
 
             GetInterfacesOutputBuilder getInterfacesOutputBuilder = new GetInterfacesOutputBuilder();
 
             Map<Integer, IfEntryBuilder> ifEntryBuilders = ifEntryBuilderMibTable.populate();
 
             List<IfEntry> ifEntries = new ArrayList<>(ifEntryBuilders.size());
-            for (Integer index : ifEntryBuilders.keySet()) {
-                IfEntryBuilder ifEntryBuilder = ifEntryBuilders.get(index);
+            for (IfEntryBuilder ifEntryBuilder: ifEntryBuilders.values()) {
                 ifEntries.add(ifEntryBuilder.build());
             }
 
             getInterfacesOutputBuilder.setIfEntry(ifEntries)
                     .setIfNumber(ifEntries.size());
 
-            RpcResultBuilder<GetInterfacesOutput> rpcResultBuilder = RpcResultBuilder.success(getInterfacesOutputBuilder.build());
+            RpcResultBuilder<GetInterfacesOutput> rpcResultBuilder = RpcResultBuilder.success(
+                    getInterfacesOutputBuilder.build());
 
             settableFuture.set(rpcResultBuilder.build());
         };
@@ -171,13 +171,13 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
 
     /**
-     * Gets Node properties such as image, serial number, platform, vendor
-     * @param input
-     * @return
+     * Gets Node properties such as image, serial number, platform, vendor.
      */
     @Override
+    @SuppressWarnings("checkstyle:IllegalCatch")
     public Future<RpcResult<GetNodePropertiesOutput>> getNodeProperties(final GetNodePropertiesInput input) {
-        LOG.debug("Received the input ip address: " + input.getIpAddress() + " and the community: " + input.getCommunity());
+        LOG.debug("getNodeProperties for ip address: {} and community: {}", input.getIpAddress(),
+                input.getCommunity());
         SettableFuture<RpcResult<GetNodePropertiesOutput>> nodePropertiesSettableFuture = SettableFuture.create();
         try {
             Map<FieldEnum, String> fieldsMap = getNetConfDeviceInfoUsingSnmp(input);
@@ -197,26 +197,25 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
             getNodePropertiesOutputBuilder.setPlatformId(platformId);
             getNodePropertiesOutputBuilder.setVendor(vendor);
 
-            LOG.debug("Received image name is: " + imageName +" vendor is: " + vendor + " platform id is: "
-                    + platformId + " serial number is: " + serialNumber + " and name is: " + name +
-                    " for the ip-address: " + input.getIpAddress());
+            LOG.debug("Received image name: {}, vendor: {}, platform id: {}, serial number: {}, name : {}, "
+                    + " ip address: {}", imageName, vendor, platformId, serialNumber, name, input.getIpAddress());
 
             RpcResultBuilder<GetNodePropertiesOutput> rpcResultBuilder = RpcResultBuilder.success();
             rpcResultBuilder.withResult(getNodePropertiesOutputBuilder.build());
             RpcResult<GetNodePropertiesOutput> rpcResult;
             rpcResult = rpcResultBuilder.build();
             nodePropertiesSettableFuture.set(rpcResult);
-        }catch (Exception e){
+        } catch (Exception e) {
             RpcResultBuilder<GetNodePropertiesOutput> errorOutput = RpcResultBuilder.failed();
-            errorOutput.withError(RpcError.ErrorType.APPLICATION, "Exception when getting node properties"+ e.getCause());
+            errorOutput.withError(RpcError.ErrorType.APPLICATION, "Error when getting node properties", e);
             nodePropertiesSettableFuture.set(errorOutput.build());
 
         }
         return nodePropertiesSettableFuture;
     }
 
-    protected Map<FieldEnum, String> getNetConfDeviceInfoUsingSnmp(final GetNodePropertiesInput input) throws Exception{
-
+    protected Map<FieldEnum, String> getNetConfDeviceInfoUsingSnmp(final GetNodePropertiesInput input)
+            throws Exception {
         Map<FieldEnum, String> fieldsMap = new HashMap<>();
 
         SnmpGetInputBuilder snmpGetInputBuilder = new SnmpGetInputBuilder();
@@ -235,7 +234,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
                 RpcResult<SnmpGetOutput> output = snmpGetOutput.get();
                 if (output != null && output.isSuccessful()) {
                     SnmpGetOutput rpcResult = output.getResult();
-                    if (rpcResult!=null && !rpcResult.getResults().isEmpty()) {
+                    if (rpcResult != null && !rpcResult.getResults().isEmpty()) {
                         fieldsMap.put(field, rpcResult.getResults().get(0).getValue());
                     }
                 }

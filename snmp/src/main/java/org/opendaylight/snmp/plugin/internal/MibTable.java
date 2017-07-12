@@ -8,6 +8,16 @@
 
 package org.opendaylight.snmp.plugin.internal;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.opendaylight.snmp.OID;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ieee.types.rev080522.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
@@ -31,22 +41,13 @@ import org.snmp4j.smi.TimeTicks;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 
-import java.lang.reflect.Method;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-
 public class MibTable<T> {
     private static final Logger LOG = LoggerFactory.getLogger(MibTable.class);
 
-    private SnmpGetInputBuilder snmpGetInputBuilder;
-    private Class<T> builderClass;
+    private final SnmpGetInputBuilder snmpGetInputBuilder;
+    private final Class<T> builderClass;
     private Map<Integer, T> indexToBuilderObject;
-    private Snmp snmp;
+    private final Snmp snmp;
 
     public MibTable(Snmp snmp, Ipv4Address ipv4Address, String community, Class<T> builderClass) {
         this.snmp = snmp;
@@ -104,7 +105,7 @@ public class MibTable<T> {
         List<VariableBinding> variableBindings;
         try {
             variableBindings = future.get();
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOG.warn("VariableBinding Future", e);
             return;
         }
@@ -114,8 +115,8 @@ public class MibTable<T> {
 
         // Send the request for the oid
         Variable variable = null;
-        Class objectType = null;
-        for (int i=0; i<variableBindings.size(); i++) {
+        Class<?> objectType = null;
+        for (int i = 0; i < variableBindings.size(); i++) {
             VariableBinding variableBinding = variableBindings.get(i);
 
             try {
@@ -191,7 +192,9 @@ public class MibTable<T> {
 
                 T builderObject;
 
-                if (setObject == null) continue;
+                if (setObject == null) {
+                    continue;
+                }
 
                 if (!indexToBuilderObject.containsKey(index)) {
                     builderObject = builderClass.newInstance();
@@ -202,11 +205,10 @@ public class MibTable<T> {
 
                 try {
                     method.invoke(builderObject, setObject);
-                }catch (Exception e) {
-                    LOG.debug(String.format("Error invoking %s with %s", method.getName(), setObject));
+                } catch (InvocationTargetException | IllegalArgumentException e) {
+                    LOG.debug(String.format("Error invoking %s with %s", method.getName(), setObject), e);
                 }
-
-            } catch (Exception e) {
+            } catch (InstantiationException | IllegalAccessException e) {
                 LOG.warn("Populate Exception", e);
             }
         }
@@ -215,7 +217,7 @@ public class MibTable<T> {
     private static Integer getIndexFromOID(String oid) {
         String[] splitString = oid.split("\\.");
         String last = splitString[splitString.length - 1];
-        return new Integer(last);
+        return Integer.valueOf(last);
     }
 
     private class GetDataObject {
