@@ -7,26 +7,6 @@
  */
 package org.opendaylight.snmp;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.SimpleJavaFileObject;
-import javax.tools.ToolProvider;
-import java.io.File;
-import java.io.FileWriter;
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.List;
-
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -37,6 +17,22 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Arrays;
+import java.util.List;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.ToolProvider;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class OIDGeneratorTest {
 
@@ -72,13 +68,10 @@ public class OIDGeneratorTest {
         doReturn(mockFileWriter).when(testOIDGenerator).getFileWriterForFile(testJavaYangModelFile);
         doNothing().when(testOIDGenerator).writeLinesToFile(anyString(), any(File.class));
 
-        doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                String writeString = (String) invocationOnMock.getArguments()[0];
-                changedFileBuilder.append(writeString);
-                return null;
-            }
+        doAnswer(invocationOnMock -> {
+            String writeString = (String) invocationOnMock.getArguments()[0];
+            changedFileBuilder.append(writeString);
+            return null;
         }).when(mockFileWriter).write(anyString());
 
     }
@@ -90,7 +83,7 @@ public class OIDGeneratorTest {
 
     private File targetDir() {
         String relPath = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
-        File targetDir = new File(relPath+"../../target");
+        File targetDir = new File(relPath + "../../target");
         return targetDir;
     }
 
@@ -106,8 +99,10 @@ public class OIDGeneratorTest {
         JavaFileObject fileObject = new JavaSourceFromString(IF_ENTRY_CLASS_NAME, changedFileBuilder.toString());
         Iterable<? extends JavaFileObject> iterableFileObjects = Arrays.asList(fileObject);
 
-        JavaCompiler.CompilationTask compilationTask = compiler.getTask(null, null, null, options, null, iterableFileObjects);
-        // compiler has been observed to fail to write errors either to provided Writer or to DiagnosticCollector, Oracle SE 1.7.0_45-b18
+        JavaCompiler.CompilationTask compilationTask = compiler.getTask(null, null, null, options, null,
+                iterableFileObjects);
+        // compiler has been observed to fail to write errors either to provided Writer or to DiagnosticCollector,
+        // Oracle SE 1.7.0_45-b18
         assertTrue("Compilation failed, see stderr above", compilationTask.call());
 
         Class<?> ifEntryClass = null;
@@ -126,7 +121,7 @@ public class OIDGeneratorTest {
     }
 
     /**
-     * Using example from http://www.java2s.com/Code/Java/JDK-6/CompilingfromMemory.htm
+     * Using example from http://www.java2s.com/Code/Java/JDK-6/CompilingfromMemory.htm.
      */
     private class JavaSourceFromString extends SimpleJavaFileObject {
 
