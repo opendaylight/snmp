@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:odl="http://opendaylight.org/xmlns/blueprint/v1.0.0"
+           odl:use-default-for-reference-types="true">
+
+  <bean id="snmpImpl" class="org.opendaylight.snmp.plugin.internal.SNMPImpl"
+      destroy-method="close"/>
+
+  <odl:rpc-implementation ref="snmpImpl"/>
+
+</blueprint>

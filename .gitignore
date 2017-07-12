@@ -1,8 +1,10 @@
 **/targer
 target
+target-ide
 *.class
 *.swp
 MANIFEST.MF
+.checkstyle
 *.classpath
 *.project
 *.settings

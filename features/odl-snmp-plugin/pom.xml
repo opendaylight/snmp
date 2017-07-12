@@ -25,11 +25,6 @@
 
     <name>OpenDaylight :: snmp-plugin :: SNMP</name>
 
-    <properties>
-        <config.configfile.directory>etc/opendaylight/karaf</config.configfile.directory>
-        <snmp.impl.configfile>snmp-impl.xml</snmp.impl.configfile>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.opendaylight.mdsal.model</groupId>
@@ -54,14 +49,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>snmp</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <!-- finalname="${config.configfile.directory}/${snmp.impl.configfile}" -->
-            <groupId>${project.groupId}</groupId>
-            <artifactId>snmp</artifactId>
-            <version>${project.version}</version>
-            <type>xml</type>
-            <classifier>config</classifier>
         </dependency>
     </dependencies>
 </project>

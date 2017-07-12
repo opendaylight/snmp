@@ -9,26 +9,33 @@ package org.opendaylight.snmp.plugin.internal;
 
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.SettableFuture;
-import org.opendaylight.controller.sal.binding.api.BindingAwareBroker;
-import org.opendaylight.controller.sal.binding.api.RpcProviderRegistry;
+import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesOutputBuilder;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesOutputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput;
+import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
-import org.opendaylight.yangtools.yang.common.RpcError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snmp4j.CommunityTarget;
@@ -39,16 +46,6 @@ import org.snmp4j.smi.Address;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
-
-import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class SNMPImpl implements SnmpService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SNMPImpl.class);
@@ -82,17 +79,12 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     ;
 
 
-    private final RpcProviderRegistry rpcProviderRegistery;
-    private final BindingAwareBroker.RpcRegistration<SnmpService> rpcRegistration;
-
-    public SNMPImpl(RpcProviderRegistry rpcProviderRegistery) {
-        this(rpcProviderRegistery, initSnmp());
+    public SNMPImpl() {
+        this(initSnmp());
     }
 
-    SNMPImpl(RpcProviderRegistry rpcProviderRegistery, Snmp snmp) {
-        this.rpcProviderRegistery = Preconditions.checkNotNull(rpcProviderRegistery);
+    SNMPImpl(Snmp snmp) {
         this.snmp = Preconditions.checkNotNull(snmp);
-        this.rpcRegistration = this.rpcProviderRegistery.addRpcImplementation(SnmpService.class, this);
     }
 
     private static Snmp initSnmp() {
@@ -144,28 +136,25 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
         final SettableFuture<RpcResult<GetInterfacesOutput>> settableFuture = SettableFuture.create();
 
-        Runnable nonBlockingPopulateRunnable = new Runnable() {
-            @Override
-            public void run() {
-                MibTable<IfEntryBuilder> ifEntryBuilderMibTable = new MibTable<>(snmp, getInterfacesInput.getIpAddress(), getInterfacesInput.getCommunity(), IfEntryBuilder.class);
+        Runnable nonBlockingPopulateRunnable = () -> {
+            MibTable<IfEntryBuilder> ifEntryBuilderMibTable = new MibTable<>(snmp, getInterfacesInput.getIpAddress(), getInterfacesInput.getCommunity(), IfEntryBuilder.class);
 
-                GetInterfacesOutputBuilder getInterfacesOutputBuilder = new GetInterfacesOutputBuilder();
+            GetInterfacesOutputBuilder getInterfacesOutputBuilder = new GetInterfacesOutputBuilder();
 
-                Map<Integer, IfEntryBuilder> ifEntryBuilders = ifEntryBuilderMibTable.populate();
+            Map<Integer, IfEntryBuilder> ifEntryBuilders = ifEntryBuilderMibTable.populate();
 
-                List<IfEntry> ifEntries = new ArrayList<>(ifEntryBuilders.size());
-                for (Integer index : ifEntryBuilders.keySet()) {
-                    IfEntryBuilder ifEntryBuilder = ifEntryBuilders.get(index);
-                    ifEntries.add(ifEntryBuilder.build());
-                }
-
-                getInterfacesOutputBuilder.setIfEntry(ifEntries)
-                        .setIfNumber(ifEntries.size());
-
-                RpcResultBuilder<GetInterfacesOutput> rpcResultBuilder = RpcResultBuilder.success(getInterfacesOutputBuilder.build());
-
-                settableFuture.set(rpcResultBuilder.build());
+            List<IfEntry> ifEntries = new ArrayList<>(ifEntryBuilders.size());
+            for (Integer index : ifEntryBuilders.keySet()) {
+                IfEntryBuilder ifEntryBuilder = ifEntryBuilders.get(index);
+                ifEntries.add(ifEntryBuilder.build());
             }
+
+            getInterfacesOutputBuilder.setIfEntry(ifEntries)
+                    .setIfNumber(ifEntries.size());
+
+            RpcResultBuilder<GetInterfacesOutput> rpcResultBuilder = RpcResultBuilder.success(getInterfacesOutputBuilder.build());
+
+            settableFuture.set(rpcResultBuilder.build());
         };
 
         Thread nonBlockingPopulate = new Thread(nonBlockingPopulateRunnable);
@@ -176,9 +165,6 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
     @Override
     public void close() throws IOException {
-        if(rpcRegistration != null) {
-            rpcRegistration.close();
-        }
         if (snmp != null) {
             snmp.close();
             snmp = null;
@@ -233,7 +219,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
     protected Map<FieldEnum, String> getNetConfDeviceInfoUsingSnmp(final GetNodePropertiesInput input) throws Exception{
 
-        Map<FieldEnum, String> fieldsMap = new HashMap<FieldEnum, String>();
+        Map<FieldEnum, String> fieldsMap = new HashMap<>();
 
         SnmpGetInputBuilder snmpGetInputBuilder = new SnmpGetInputBuilder();
         snmpGetInputBuilder.setCommunity(input.getCommunity());
