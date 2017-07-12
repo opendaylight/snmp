@@ -76,8 +76,6 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         }
     }
 
-    ;
-
 
     public SNMPImpl() {
         this(initSnmp());
