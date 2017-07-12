@@ -79,8 +79,6 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         }
     }
 
-    ;
-
 
     private final RpcProviderRegistry rpcProviderRegistery;
     private final BindingAwareBroker.RpcRegistration<SnmpService> rpcRegistration;
