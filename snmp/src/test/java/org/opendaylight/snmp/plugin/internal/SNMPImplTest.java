@@ -16,7 +16,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -26,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -42,13 +42,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePrope
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.Results;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.ResultsBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
@@ -70,7 +67,7 @@ public class SNMPImplTest {
     private static final String LOCATION_OID = "1.3.6.1.2.1.1.6.0";
     private static final String GET_IP_ADDRESS = "10.10.10.10";
     private static final String SET_IP_ADDRESS = "20.20.20.20";
-    private static final Integer snmpListenPort = 161;
+    private static final Integer SNMP_LISTEN_PORT = 161;
     private static final String COMMUNITY = "CommunityName";
     private static final String CISCO_COMMUNITY = "cisco";
     private static final String VALUE = "test";
@@ -79,23 +76,30 @@ public class SNMPImplTest {
     private static final int MAXREPETITIONS = 10000;
 
     private static final String SYS_RESPONSE_NAME = "xrvr-1";
-    private static final String SYS_RESPONSE_IMAGE_NAME = "Cisco IOS XR Software (Cisco IOS XRv Series),  Version 5.3.0.14C[Default]\\\\r\\\\nCopyright (c) 2014 by Cisco Systems, Inc.";
+    private static final String SYS_RESPONSE_IMAGE_NAME =  "Cisco IOS XR Software (Cisco IOS XRv Series),  "
+            + "Version 5.3.0.14C[Default]\\\\r\\\\nCopyright (c) 2014 by Cisco Systems, Inc.";
     private static final String SYS_RESPONSE_VENDOR = "Cisco Systems, Inc.";
     private static final String SYS_RESPONSE_SERIAL_NUMBER = "9VAPIBNARTG";
     private static final String SYS_RESPONSE_PLATFORM_ID = "IOSXRV";
 
-    private static Snmp mockSnmp = null;
-    private static SNMPImpl snmpImpl = null;
-    private static AsyncGetHandler getHandler = null;
-    private static Future<RpcResult<SnmpGetOutput>> futureSnmpGetOutput = null;
+    private Snmp mockSnmp;
+    private SNMPImpl snmpImpl;
+    private AsyncGetHandler getHandler;
+    private Future<RpcResult<SnmpGetOutput>> futureSnmpGetOutput;
 
     @Before
     public void setUp() throws IOException {
-        // GET response
         mockSnmp = mock(Snmp.class);
+        snmpImpl = new SNMPImpl(mockSnmp);
     }
 
-    @SuppressWarnings("resource")
+    @After
+    public void cleanup() throws IOException {
+        if (snmpImpl != null) {
+            snmpImpl.close();
+        }
+    }
+
     @Test
     public void testGet() throws IOException, InterruptedException, ExecutionException {
         final ResponseEvent event = createResponseEvent();
@@ -108,33 +112,34 @@ public class SNMPImplTest {
             ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
             callback.onResponse(event);
             return null;
-        }).when(mockSnmp).send(argThat(new ArgumentMatcher<PDU>(){
+        }).when(mockSnmp).send(argThat(new ArgumentMatcher<PDU>() {
             @Override
             public boolean matches(Object argument) {
                 if (argument instanceof PDU) {
                     PDU pdu = (PDU)argument;
                     assertEquals("Checking PDU Get type", pdu.getType(), PDU.GET);
-                    assertEquals("Checking PDU OID value", pdu.getVariableBindings().get(0).getOid().toString(), SYS_OID_REQUEST);
+                    assertEquals("Checking PDU OID value", pdu.getVariableBindings().get(0).getOid().toString(),
+                            SYS_OID_REQUEST);
                     assertEquals("Checking max repititions", pdu.getMaxRepetitions(), MAXREPETITIONS);
                     return true;
                 }
                 return false;
-            }}), argThat(new ArgumentMatcher<Target>(){
-                @Override
-                public boolean matches(Object argument) {
-                    if (argument instanceof Target) {
-                        Target target = (Target)argument;
-                        assertEquals(target.getSecurityName().toString(), COMMUNITY);
-                        assertEquals(target.getAddress().toString(), GET_IP_ADDRESS + "/" + snmpListenPort.toString());
-                        assertEquals(target.getTimeout(), TIMEOUT);
-                        assertEquals(target.getRetries(), RETRIES);
-                        assertEquals(target.getVersion(), SnmpConstants.version2c);
-                        return true;
-                    }
-                    return false;
-                }}),  any(), (ResponseListener) any());
-
-        SNMPImpl snmpImpl = new SNMPImpl(mockSnmp);
+            }
+        }), argThat(new ArgumentMatcher<Target>() {
+            @Override
+            public boolean matches(Object argument) {
+                if (argument instanceof Target) {
+                    Target target = (Target) argument;
+                    assertEquals(target.getSecurityName().toString(), COMMUNITY);
+                    assertEquals(target.getAddress().toString(), GET_IP_ADDRESS + "/" + SNMP_LISTEN_PORT.toString());
+                    assertEquals(target.getTimeout(), TIMEOUT);
+                    assertEquals(target.getRetries(), RETRIES);
+                    assertEquals(target.getVersion(), SnmpConstants.version2c);
+                    return true;
+                }
+                return false;
+            }
+        }), any(), (ResponseListener) any());
 
         String value = "Failed";
         String oid = "bad oid";
@@ -164,7 +169,6 @@ public class SNMPImplTest {
         assertEquals(oid, SYS_OID_REQUEST);
     }
 
-    @SuppressWarnings("resource")
     @Test
     public void testSet() throws IOException, InterruptedException, ExecutionException {
         final ResponseEvent event = createResponseEvent();
@@ -179,29 +183,31 @@ public class SNMPImplTest {
             @Override
             public boolean matches(Object argument) {
                 if (argument instanceof PDU) {
-                    PDU pdu = (PDU)argument;
+                    PDU pdu = (PDU) argument;
                     assertEquals("Checking SET PDU type", pdu.getType(), PDU.SET);
                     assertEquals("Checking Value of SET", pdu.getVariableBindings().get(0).toValueString(), VALUE);
-                    assertEquals("Checking OID of SET", pdu.getVariableBindings().get(0).getOid().toString(), LOCATION_OID);
+                    assertEquals("Checking OID of SET", pdu.getVariableBindings().get(0).getOid().toString(),
+                            LOCATION_OID);
                     return true;
                 }
                 return false;
-            }}), argThat(new ArgumentMatcher<Target>(){
-                @Override
-                public boolean matches(Object argument) {
-                    if (argument instanceof Target) {
-                        Target target = (Target)argument;
-                        assertEquals("Checking community of SET", target.getSecurityName().toString(), COMMUNITY);
-                        assertEquals("Checking target IP", target.getAddress().toString(), SET_IP_ADDRESS + "/" + snmpListenPort.toString());
-                        assertEquals("Checking timeout", target.getTimeout(), TIMEOUT);
-                        assertEquals("Checking retries", target.getRetries(), RETRIES);
-                        assertEquals("Checking version", target.getVersion(), SnmpConstants.version2c);
-                        return true;
-                    }
-                    return false;
-                }}), any(), (ResponseListener)any());
-
-        SNMPImpl snmpImpl = new SNMPImpl(mockSnmp);
+            }
+        }), argThat(new ArgumentMatcher<Target>() {
+            @Override
+            public boolean matches(Object argument) {
+                if (argument instanceof Target) {
+                    Target target = (Target) argument;
+                    assertEquals("Checking community of SET", target.getSecurityName().toString(), COMMUNITY);
+                    assertEquals("Checking target IP", target.getAddress().toString(),
+                            SET_IP_ADDRESS + "/" + SNMP_LISTEN_PORT.toString());
+                    assertEquals("Checking timeout", target.getTimeout(), TIMEOUT);
+                    assertEquals("Checking retries", target.getRetries(), RETRIES);
+                    assertEquals("Checking version", target.getVersion(), SnmpConstants.version2c);
+                    return true;
+                }
+                return false;
+            }
+        }), any(), (ResponseListener) any());
 
         Ipv4Address ip = new Ipv4Address(SET_IP_ADDRESS);
         SnmpSetInputBuilder input = new SnmpSetInputBuilder();
@@ -220,7 +226,7 @@ public class SNMPImplTest {
      * create a response from a GET request, it can also be
      * use as the responseEvent for SET
      */
-    public static ResponseEvent createResponseEvent() throws UnknownHostException {
+    private ResponseEvent createResponseEvent() throws UnknownHostException {
         // create request PDU
         PDU requestPdu = new PDU();
         OID requestOid = new OID(SYS_OID_REQUEST);
@@ -240,7 +246,7 @@ public class SNMPImplTest {
 
         // create ip address
         Address addr = null;
-        addr = new UdpAddress(Inet4Address.getByName(GET_IP_ADDRESS), snmpListenPort);
+        addr = new UdpAddress(Inet4Address.getByName(GET_IP_ADDRESS), SNMP_LISTEN_PORT);
 
         // create the ResponseEvent
         ResponseEvent responseEvent = new ResponseEvent(mockSnmp,     // source
@@ -254,22 +260,22 @@ public class SNMPImplTest {
 
     @Test
     public void testGetInterfaces() throws Exception {
-        final String baseIFOIB = "1.3.6.1.2.1.2.2.1.";
-        final OID ifIndexOID = new OID(baseIFOIB + "1");
-        final OID ifAdminStatusOID = new OID(baseIFOIB + "7");
-        final OID ifDescrOID = new OID(baseIFOIB + "2");
-        final OID ifInErrorsOID = new OID(baseIFOIB + "14");
+        final String baseIfOIB = "1.3.6.1.2.1.2.2.1.";
+        final OID ifIndexOID = new OID(baseIfOIB + "1");
+        final OID ifAdminStatusOID = new OID(baseIfOIB + "7");
+        final OID ifDescrOID = new OID(baseIfOIB + "2");
+        final OID ifInErrorsOID = new OID(baseIfOIB + "14");
 
 
         // Generate the test list of interfaces
         final List<IfEntry> testInterfaceEntries = new ArrayList<>();
 
-        for (int i=0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             IfEntryBuilder ifEntryBuilder = new IfEntryBuilder()
                     .setIfIndex(new InterfaceIndex(i + 1))
                     .setIfAdminStatus(IfEntry.IfAdminStatus.forValue(i % 3))
                     .setIfDescr(new DisplayString(String.format("Interface %s", i)))
-                    .setIfInErrors(new Counter32(99l-i));
+                    .setIfInErrors(new Counter32(99L - i));
             testInterfaceEntries.add(ifEntryBuilder.build());
         }
 
@@ -277,7 +283,7 @@ public class SNMPImplTest {
         // This is responsible for calling the onResponse() callback for SNMP messages
         doAnswer(invocation -> {
             PDU requestPDU = (PDU) invocation.getArguments()[0];
-            ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
+            final ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
 
             // Create the response PDU based on the request PDU
             PDU responsePDU = new PDU();
@@ -287,7 +293,7 @@ public class SNMPImplTest {
             assertEquals("Checking size of PDU response variable bindings", 1, requestPDU.getVariableBindings().size());
             OID requestOID = requestPDU.getVariableBindings().get(0).getOid();
 
-            for (int i=0; i<testInterfaceEntries.size(); i++) {
+            for (int i = 0; i < testInterfaceEntries.size(); i++) {
                 IfEntry testIfEntry = testInterfaceEntries.get(i);
                 int[] prefix = requestOID.getValue();
                 Variable val = null;
@@ -317,7 +323,7 @@ public class SNMPImplTest {
             }
 
             ResponseEvent responseEvent = new ResponseEvent(mockSnmp,
-                    new UdpAddress(Inet4Address.getByName(GET_IP_ADDRESS), snmpListenPort),
+                    new UdpAddress(Inet4Address.getByName(GET_IP_ADDRESS), SNMP_LISTEN_PORT),
                     requestPDU,
                     responsePDU,
                     null,
@@ -327,17 +333,15 @@ public class SNMPImplTest {
             return null;
         }).when(mockSnmp).send(any(PDU.class), any(Target.class), any(), (ResponseListener) any());
 
-        try (SNMPImpl snmpImpl = new SNMPImpl(mockSnmp)) {
-            Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
-            GetInterfacesInputBuilder input = new GetInterfacesInputBuilder();
-            input.setCommunity(COMMUNITY);
-            input.setIpAddress(ip);
+        Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
+        GetInterfacesInputBuilder input = new GetInterfacesInputBuilder();
+        input.setCommunity(COMMUNITY);
+        input.setIpAddress(ip);
 
-            RpcResult<GetInterfacesOutput> result = null;
-            Future<RpcResult<GetInterfacesOutput>> resultFuture = snmpImpl.getInterfaces(input.build());
-            result = resultFuture.get();
-            assertTrue(result.isSuccessful());
-        }
+        RpcResult<GetInterfacesOutput> result = null;
+        Future<RpcResult<GetInterfacesOutput>> resultFuture = snmpImpl.getInterfaces(input.build());
+        result = resultFuture.get();
+        assertTrue(result.isSuccessful());
     }
 
     /*
@@ -345,7 +349,7 @@ public class SNMPImplTest {
      * @startWith sub-identifier to start with
      * @startWith sub-identifier to end with; if <code>endWith &lt; startWith</code> return no results
      */
-    public static ResponseEvent createBulkResponseEvent(int startWith, int endWith) throws UnknownHostException {
+    private ResponseEvent createBulkResponseEvent(int startWith, int endWith) throws UnknownHostException {
         // create request PDU
         PDU requestPdu = new PDU();
         OID requestOid = new OID(SYS_OID_REQUEST + "." + startWith);
@@ -357,9 +361,9 @@ public class SNMPImplTest {
         // create response PDU
         PDU responsePdu = new PDU();
         for (int i = startWith; i <= endWith; i++) {
-          OID responseOid = new OID(SYS_OID_REQUEST + "." + i);
-          Variable variable = new OctetString(SYS_OID_RESPONSE);
-          responsePdu.add(new VariableBinding(responseOid, variable));
+            OID responseOid = new OID(SYS_OID_REQUEST + "." + i);
+            Variable variable = new OctetString(SYS_OID_RESPONSE);
+            responsePdu.add(new VariableBinding(responseOid, variable));
         }
         responsePdu.setMaxRepetitions(10000);
         responsePdu.setNonRepeaters(0);
@@ -367,7 +371,7 @@ public class SNMPImplTest {
 
         // create ip address
         Address addr = null;
-        addr = new UdpAddress(Inet4Address.getByName(GET_IP_ADDRESS), snmpListenPort);
+        addr = new UdpAddress(Inet4Address.getByName(GET_IP_ADDRESS), SNMP_LISTEN_PORT);
 
         // create the ResponseEvent
         ResponseEvent responseEvent = new ResponseEvent(mockSnmp,     // source
@@ -389,8 +393,8 @@ public class SNMPImplTest {
     }
 
     /**
-     * Walk some OIDS and simulate a timeout partway through.  This also tests exception handling in {@link AsyncGetHandler},
-     * since timeouts lead to thrown exceptions there.
+     * Walk some OIDS and simulate a timeout partway through.  This also tests exception handling in
+     * {@link AsyncGetHandler}, since timeouts lead to thrown exceptions there.
      */
     @Test
     public void testWalkTimeout() throws IOException, InterruptedException, ExecutionException {
@@ -398,10 +402,12 @@ public class SNMPImplTest {
         RpcResult<SnmpGetOutput> result = bulkTest(10, 200, timeoutAfterBinding);
         assertFalse("Checking results success", result.isSuccessful());
         List<Results> snmpResults = result.getResult().getResults();
-        assertEquals("Checking results size", timeoutAfterBinding, snmpResults.size()); // partial result set, up to the timeout
+        // partial result set, up to the timeout
+        assertEquals("Checking results size", timeoutAfterBinding, snmpResults.size());
     }
 
-    private RpcResult<SnmpGetOutput> bulkTest(final int bindingsPerCall, final int stopWithBinding, final int timeoutAfterBinding) throws IOException, InterruptedException, ExecutionException {
+    private RpcResult<SnmpGetOutput> bulkTest(final int bindingsPerCall, final int stopWithBinding,
+            final int timeoutAfterBinding) throws IOException, InterruptedException, ExecutionException {
         doAnswer(invocation -> {
             PDU pdu = (PDU) invocation.getArguments()[0];
             OID oid = pdu.getVariableBindings().get(0).getOid();
@@ -426,7 +432,8 @@ public class SNMPImplTest {
                 if (argument instanceof PDU) {
                     PDU pdu = (PDU) argument;
                     assertEquals("Checking PDU Get type", pdu.getType(), PDU.GETBULK);
-                    assertTrue("Checking PDU OID value", pdu.getVariableBindings().get(0).getOid().toString().startsWith(SYS_OID_REQUEST));
+                    assertTrue("Checking PDU OID value", pdu.getVariableBindings().get(0).getOid().toString()
+                            .startsWith(SYS_OID_REQUEST));
                     assertEquals("Checking max repetitions", pdu.getMaxRepetitions(), MAXREPETITIONS);
                     return true;
                 }
@@ -438,7 +445,7 @@ public class SNMPImplTest {
                 if (argument instanceof Target) {
                     Target target = (Target) argument;
                     assertEquals(target.getSecurityName().toString(), COMMUNITY);
-                    assertEquals(target.getAddress().toString(), GET_IP_ADDRESS + "/" + snmpListenPort.toString());
+                    assertEquals(target.getAddress().toString(), GET_IP_ADDRESS + "/" + SNMP_LISTEN_PORT.toString());
                     assertEquals(target.getTimeout(), TIMEOUT);
                     assertEquals(target.getRetries(), RETRIES);
                     assertEquals(target.getVersion(), SnmpConstants.version2c);
@@ -448,107 +455,102 @@ public class SNMPImplTest {
             }
         }), any(), (ResponseListener) any());
 
-        try (SNMPImpl snmpImpl = new SNMPImpl(mockSnmp)) {
-            Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
-            SnmpGetInputBuilder input = new SnmpGetInputBuilder();
-            input.setCommunity(COMMUNITY);
-            input.setIpAddress(ip);
-            input.setOid(SYS_OID_REQUEST);
-            input.setGetType(SnmpGetType.GETWALK);
+        Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
+        SnmpGetInputBuilder input = new SnmpGetInputBuilder();
+        input.setCommunity(COMMUNITY);
+        input.setIpAddress(ip);
+        input.setOid(SYS_OID_REQUEST);
+        input.setGetType(SnmpGetType.GETWALK);
 
-            Future<RpcResult<SnmpGetOutput>> resultFuture = snmpImpl.snmpGet(input.build());
+        Future<RpcResult<SnmpGetOutput>> resultFuture = snmpImpl.snmpGet(input.build());
 
-            RpcResult<SnmpGetOutput> result = resultFuture.get();
-            SnmpGetOutput output = result.getResult();
-            List<Results> snmpResults = output.getResults();
-            for (Results r : snmpResults) {
-                String oid = r.getOid();
-                assertEquals("Checking results value, oid " + oid, SYS_OID_RESPONSE, r.getValue());
-                assertTrue("Checking results oid " + oid, oid.startsWith(SYS_OID_REQUEST));
-            }
-            return result;
+        RpcResult<SnmpGetOutput> result = resultFuture.get();
+        SnmpGetOutput output = result.getResult();
+        List<Results> snmpResults = output.getResults();
+        for (Results r : snmpResults) {
+            String oid = r.getOid();
+            assertEquals("Checking results value, oid " + oid, SYS_OID_RESPONSE, r.getValue());
+            assertTrue("Checking results oid " + oid, oid.startsWith(SYS_OID_REQUEST));
         }
+
+        return result;
     }
 
-        @SuppressWarnings("resource")
-        @Test(expected = IllegalArgumentException.class)
-        public void testGetNodePropertiesInvalidIp() throws ExecutionException, InterruptedException, Exception {
-            Map<SNMPImpl.FieldEnum,String> netConfDeviceInfo = new HashMap<>();
-            netConfDeviceInfo.put(SNMPImpl.FieldEnum.NAME,SYS_RESPONSE_NAME);
-            netConfDeviceInfo.put(SNMPImpl.FieldEnum.SERIAL_NUMBER,SYS_RESPONSE_SERIAL_NUMBER);
-            netConfDeviceInfo.put(SNMPImpl.FieldEnum.PLATFORM_ID,SYS_RESPONSE_PLATFORM_ID);
-            netConfDeviceInfo.put(SNMPImpl.FieldEnum.IMAGE_NAME, SYS_RESPONSE_IMAGE_NAME);
-            netConfDeviceInfo.put(SNMPImpl.FieldEnum.VENDOR, SYS_RESPONSE_VENDOR);
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetNodePropertiesInvalidIp() throws ExecutionException, InterruptedException, Exception {
+        Map<SNMPImpl.FieldEnum, String> netConfDeviceInfo = new HashMap<>();
+        netConfDeviceInfo.put(SNMPImpl.FieldEnum.NAME, SYS_RESPONSE_NAME);
+        netConfDeviceInfo.put(SNMPImpl.FieldEnum.SERIAL_NUMBER, SYS_RESPONSE_SERIAL_NUMBER);
+        netConfDeviceInfo.put(SNMPImpl.FieldEnum.PLATFORM_ID, SYS_RESPONSE_PLATFORM_ID);
+        netConfDeviceInfo.put(SNMPImpl.FieldEnum.IMAGE_NAME, SYS_RESPONSE_IMAGE_NAME);
+        netConfDeviceInfo.put(SNMPImpl.FieldEnum.VENDOR, SYS_RESPONSE_VENDOR);
 
-            Ipv4Address ip = new Ipv4Address("12345.1.1.1");
-            GetNodePropertiesInputBuilder input = new GetNodePropertiesInputBuilder();
-            input.setCommunity(CISCO_COMMUNITY);
-            input.setIpAddress(ip);
+        Ipv4Address ip = new Ipv4Address("12345.1.1.1");
+        GetNodePropertiesInputBuilder input = new GetNodePropertiesInputBuilder();
+        input.setCommunity(CISCO_COMMUNITY);
+        input.setIpAddress(ip);
 
-            GetNodePropertiesInput propertiesInput =input.build();
+        GetNodePropertiesInput propertiesInput = input.build();
 
+        when(snmpImpl.getNetConfDeviceInfoUsingSnmp(propertiesInput)).thenReturn(netConfDeviceInfo);
+        when(snmpImpl.getNodeProperties(propertiesInput)).thenCallRealMethod();
 
-            when(snmpImpl.getNetConfDeviceInfoUsingSnmp(propertiesInput)).thenReturn(netConfDeviceInfo);
-            when(snmpImpl.getNodeProperties(propertiesInput)).thenCallRealMethod();
+        Future<RpcResult<GetNodePropertiesOutput>> resultFuture = snmpImpl.getNodeProperties(propertiesInput);
 
-            Future<RpcResult<GetNodePropertiesOutput>> resultFuture = snmpImpl.getNodeProperties(propertiesInput);
-
-            RpcResult<GetNodePropertiesOutput> result = resultFuture.get();
-            String imageName =null;
-            String name = null;
-            String platformId = null;
-            String serialNumber = null;
-            String vendor = null;
-            if (result.isSuccessful()) {
-                GetNodePropertiesOutput output = result.getResult();
-                imageName = output.getImageName();
-                name=output.getName();
-                platformId = output.getPlatformId();
-                serialNumber = output.getSerialNumber();
-                vendor = output.getVendor();
-            }
-            assertEquals(SYS_RESPONSE_NAME,name);
-            assertEquals(SYS_RESPONSE_IMAGE_NAME,imageName);
-            assertEquals(SYS_RESPONSE_VENDOR,vendor);
-            assertEquals(SYS_RESPONSE_PLATFORM_ID,platformId);
-            assertEquals(SYS_RESPONSE_SERIAL_NUMBER,serialNumber);
-
+        RpcResult<GetNodePropertiesOutput> result = resultFuture.get();
+        String imageName = null;
+        String name = null;
+        String platformId = null;
+        String serialNumber = null;
+        String vendor = null;
+        if (result.isSuccessful()) {
+            GetNodePropertiesOutput output = result.getResult();
+            imageName = output.getImageName();
+            name = output.getName();
+            platformId = output.getPlatformId();
+            serialNumber = output.getSerialNumber();
+            vendor = output.getVendor();
         }
+        assertEquals(SYS_RESPONSE_NAME, name);
+        assertEquals(SYS_RESPONSE_IMAGE_NAME, imageName);
+        assertEquals(SYS_RESPONSE_VENDOR, vendor);
+        assertEquals(SYS_RESPONSE_PLATFORM_ID, platformId);
+        assertEquals(SYS_RESPONSE_SERIAL_NUMBER, serialNumber);
 
-        //TODO: This test is getting stuck in between- Needs to be fixed
-        @SuppressWarnings("resource")
-        public void testGetNetConfDeviceInfoUsingSnmp() throws ExecutionException, InterruptedException, Exception {
+    }
 
-            Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
-            GetNodePropertiesInputBuilder input = new GetNodePropertiesInputBuilder();
-            input.setCommunity(CISCO_COMMUNITY);
-            input.setIpAddress(ip);
+    /*
+    //TODO: This test is getting stuck in between- Needs to be fixed
+    public void testGetNetConfDeviceInfoUsingSnmp() throws ExecutionException, InterruptedException, Exception {
 
-            GetNodePropertiesInput propertiesInput =input.build();
+        Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
+        GetNodePropertiesInputBuilder input = new GetNodePropertiesInputBuilder();
+        input.setCommunity(CISCO_COMMUNITY);
+        input.setIpAddress(ip);
 
-            SNMPImpl snmpImpl = new SNMPImpl(mockSnmp);
-            SettableFuture<RpcResult<SnmpGetOutput>> snmpGetOutput = SettableFuture.create();
-            RpcResultBuilder<SnmpGetOutput> rpcResultBuilder = RpcResultBuilder.success();
-            SnmpGetOutputBuilder snmpGetOutputBuilder = new SnmpGetOutputBuilder();
-            List<Results> results = new ArrayList<>();
-            ResultsBuilder resultsBuilder = new ResultsBuilder();
-            resultsBuilder.setOid(SNMPImpl.FieldEnum.SERIAL_NUMBER.getObjectId());
-            resultsBuilder.setValue(SYS_RESPONSE_SERIAL_NUMBER);
-            results.add(resultsBuilder.build());
-            snmpGetOutputBuilder.setResults(results);
-            rpcResultBuilder.withResult(snmpGetOutputBuilder.build());
-            RpcResult<SnmpGetOutput> rpcResult;
-            rpcResult = rpcResultBuilder.build();
-            snmpGetOutput.set(rpcResult);
+        final GetNodePropertiesInput propertiesInput = input.build();
+
+        final SettableFuture<RpcResult<SnmpGetOutput>> snmpGetOutput = SettableFuture.create();
+        final RpcResultBuilder<SnmpGetOutput> rpcResultBuilder = RpcResultBuilder.success();
+        final SnmpGetOutputBuilder snmpGetOutputBuilder = new SnmpGetOutputBuilder();
+        List<Results> results = new ArrayList<>();
+        ResultsBuilder resultsBuilder = new ResultsBuilder();
+        resultsBuilder.setOid(SNMPImpl.FieldEnum.SERIAL_NUMBER.getObjectId());
+        resultsBuilder.setValue(SYS_RESPONSE_SERIAL_NUMBER);
+        results.add(resultsBuilder.build());
+        snmpGetOutputBuilder.setResults(results);
+        rpcResultBuilder.withResult(snmpGetOutputBuilder.build());
+        RpcResult<SnmpGetOutput> rpcResult;
+        rpcResult = rpcResultBuilder.build();
+        snmpGetOutput.set(rpcResult);
 
 
-            when(getHandler.getRpcResponse()).thenReturn(snmpGetOutput);
-            when(futureSnmpGetOutput.get()).thenReturn(rpcResult);
+        when(getHandler.getRpcResponse()).thenReturn(snmpGetOutput);
+        when(futureSnmpGetOutput.get()).thenReturn(rpcResult);
 
-            Map<SNMPImpl.FieldEnum, String> map = snmpImpl.getNetConfDeviceInfoUsingSnmp(propertiesInput);
+        Map<SNMPImpl.FieldEnum, String> map = snmpImpl.getNetConfDeviceInfoUsingSnmp(propertiesInput);
 
-            assertEquals(SYS_RESPONSE_SERIAL_NUMBER, map.get(SNMPImpl.FieldEnum.SERIAL_NUMBER));
-
-        }
-
+        assertEquals(SYS_RESPONSE_SERIAL_NUMBER, map.get(SNMPImpl.FieldEnum.SERIAL_NUMBER));
+    }
+    */
 }
