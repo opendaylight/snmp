@@ -15,5 +15,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface OID {
+
+    //
+    // Needs to be public for use in Mojo generation, so the annotation is
+    // added to ignore compile warnings.
+    //
+    @SuppressWarnings("UnnecessaryInterfaceModifier")
     public String value() default "";
 }

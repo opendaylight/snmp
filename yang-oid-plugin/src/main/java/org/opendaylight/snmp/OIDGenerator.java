@@ -68,10 +68,6 @@ public class OIDGenerator extends AbstractMojo {
             "    public String value() default \"\";\n" +
             "}";
 
-    public OIDGenerator() {
-
-    }
-
     OIDGenerator(File _oidDirectory, File _yangDirectory, File _oidClassFile) {
         oidDirectory = _oidDirectory;
         yangDirectory = _yangDirectory;
