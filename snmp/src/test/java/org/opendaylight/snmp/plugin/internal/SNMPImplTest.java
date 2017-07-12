@@ -16,7 +16,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
@@ -42,13 +41,10 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePrope
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetNodePropertiesOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInputBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.Results;
-import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.ResultsBuilder;
 import org.opendaylight.yangtools.yang.common.RpcResult;
-import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
 import org.snmp4j.Target;
@@ -86,8 +82,6 @@ public class SNMPImplTest {
 
     private static Snmp mockSnmp = null;
     private static SNMPImpl snmpImpl = null;
-    private static AsyncGetHandler getHandler = null;
-    private static Future<RpcResult<SnmpGetOutput>> futureSnmpGetOutput = null;
 
     @Before
     public void setUp() throws IOException {
@@ -515,6 +509,7 @@ public class SNMPImplTest {
 
         }
 
+        /*
         //TODO: This test is getting stuck in between- Needs to be fixed
         @SuppressWarnings("resource")
         public void testGetNetConfDeviceInfoUsingSnmp() throws ExecutionException, InterruptedException, Exception {
@@ -550,5 +545,6 @@ public class SNMPImplTest {
             assertEquals(SYS_RESPONSE_SERIAL_NUMBER, map.get(SNMPImpl.FieldEnum.SERIAL_NUMBER));
 
         }
+        */
 
 }
