@@ -8,6 +8,7 @@
 package org.opendaylight.snmp.plugin.internal;
 
 import com.google.common.util.concurrent.SettableFuture;
+import java.io.IOException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -27,15 +28,13 @@ import org.snmp4j.smi.UnsignedInteger32;
 import org.snmp4j.smi.Variable;
 import org.snmp4j.smi.VariableBinding;
 
-import java.io.IOException;
-
 public class AsyncSetHandler implements ResponseListener {
     private static final Logger LOG = LoggerFactory.getLogger(AsyncSetHandler.class);
     private SettableFuture<RpcResult<Void>> rpcResultSettableFuture;
-    private Snmp snmp4j;
-    private SnmpSetInput snmpSetInput;
-    private Target target;
-    private OID oid;
+    private final Snmp snmp4j;
+    private final SnmpSetInput snmpSetInput;
+    private final Target target;
+    private final OID oid;
     private PDU pdu;
 
 
@@ -132,7 +131,8 @@ public class AsyncSetHandler implements ResponseListener {
                         // Return an error and set the future.
 
                         rpcResultBuilder = RpcResultBuilder.failed();
-                        rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION, "SnmpSET failed. Unknown object set type");
+                        rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
+                                "SnmpSET failed. Unknown object set type");
                     }
 
                 } else {
@@ -145,8 +145,7 @@ public class AsyncSetHandler implements ResponseListener {
                             String.format("SnmpSET failed with error status: %s, error index: %s. StatusText: %s",
                                     errorStatus, errorIndex, errorString));
                 }
-            }
-            else {
+            } else {
                 rpcResultBuilder = RpcResultBuilder.success();
             }
 
