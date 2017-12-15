@@ -81,7 +81,7 @@ public class AsyncSetHandler implements ResponseListener {
                 Integer intValue = Integer.parseInt(value);
                 variableBinding = new VariableBinding(oid, new Integer32(intValue));
             } catch (NumberFormatException e) {
-                throw new SetTypeException("Unknown set type");
+                throw new SetTypeException("Unknown set type " + value, e);
             }
         } else if (variable instanceof Integer32) {
 

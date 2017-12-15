@@ -13,4 +13,8 @@ public class SetTypeException extends Exception {
     public SetTypeException(String msg) {
         super(msg);
     }
+
+    public SetTypeException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }
