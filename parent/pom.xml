@@ -10,9 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
 
   <parent>
-      <groupId>org.opendaylight.odlparent</groupId>
-      <artifactId>odlparent</artifactId>
-      <version>3.0.2</version>
+      <groupId>org.opendaylight.mdsal</groupId>
+      <artifactId>binding-parent</artifactId>
+      <version>0.12.0-SNAPSHOT</version>
       <relativePath/>
   </parent>
 
@@ -43,13 +43,7 @@
     </scm>
 
     <properties>
-        <yangtools.version>2.0.1</yangtools.version>
-        <mdsal.version>1.7.0-SNAPSHOT</mdsal.version>
-        <mdsal.java.binding.version>0.12.0-SNAPSHOT</mdsal.java.binding.version>
-        <mdsal.model.version>1.7.0-SNAPSHOT</mdsal.model.version>
-        <config.version>0.8.0-SNAPSHOT</config.version>
         <apache.servicemix.version>2.3.1_1</apache.servicemix.version>
-        <snmp.impl.configfile>snmp-impl.xml</snmp.impl.configfile>
         <snmp.version>1.5.0-SNAPSHOT</snmp.version>
     </properties>
 
@@ -62,38 +56,10 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-             <dependency>
-                <groupId>org.opendaylight.yangtools</groupId>
-                <artifactId>yangtools-artifacts</artifactId>
-                <version>${yangtools.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-            <dependency>
-              <groupId>org.opendaylight.mdsal</groupId>
-              <artifactId>mdsal-artifacts</artifactId>
-              <version>2.4.0-SNAPSHOT</version>
-              <type>pom</type>
-              <scope>import</scope>
-            </dependency>
-            <dependency>
-              <groupId>org.opendaylight.mdsal.model</groupId>
-              <artifactId>mdsal-model-artifacts</artifactId>
-              <version>0.12.0-SNAPSHOT</version>
-              <type>pom</type>
-              <scope>import</scope>
-            </dependency>
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>${mdsal.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-            <dependency>
-                <groupId>org.opendaylight.controller</groupId>
-                <artifactId>config-artifacts</artifactId>
-                <version>${config.version}</version>
+                <version>1.7.0-SNAPSHOT</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -103,53 +69,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.opendaylight.yangtools</groupId>
-                    <artifactId>yang-maven-plugin</artifactId>
-                    <version>${yangtools.version}</version>
-                     <executions>
-                        <execution>
-                            <goals>
-                                <goal>generate-sources</goal>
-                            </goals>
-                            <configuration>
-                                <!-- directory containing yang files to parse and generate code -->
-                                <yangFilesRootDir>src/main/yang</yangFilesRootDir>
-                                <codeGenerators>
-                                    <generator>
-                                        <codeGeneratorClass>org.opendaylight.controller.config.yangjmxgenerator.plugin.JMXGenerator</codeGeneratorClass>
-                                        <outputBaseDir>target/generated-sources/config</outputBaseDir>
-                                        <additionalConfiguration>
-                                            <namespaceToPackage1>urn:opendaylight:params:xml:ns:yang:controller==org.opendaylight.controller.config.yang</namespaceToPackage1>
-                                        </additionalConfiguration>
-                                    </generator>
-                                    <generator>
-                                        <codeGeneratorClass>
-                                            org.opendaylight.mdsal.binding.maven.api.gen.plugin.CodeGeneratorImpl
-                                        </codeGeneratorClass>
-                                        <!-- directory into which generated files will be placed -->
-                                        <outputBaseDir>target/generated-sources/sal</outputBaseDir>
-                                    </generator>
-                                </codeGenerators>
-                                <!-- if true, plugin will search for yang files also in dependent projects -->
-                                <inspectDependencies>true</inspectDependencies>
-                            </configuration>
-                        </execution>
-                    </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.opendaylight.mdsal</groupId>
-                            <artifactId>maven-sal-api-gen-plugin</artifactId>
-                            <version>${mdsal.java.binding.version}</version>
-                            <type>jar</type>
-                        </dependency>
-                        <dependency>
-                            <groupId>org.opendaylight.controller</groupId>
-                            <artifactId>yang-jmx-generator-plugin</artifactId>
-                            <version>${config.version}</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
