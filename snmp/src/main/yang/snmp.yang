@@ -46,6 +46,12 @@ module snmp {
                 type inet:ipv4-address;
             }
 
+            leaf port {
+                type inet:port-number;
+                default 161;
+                mandatory false;
+            }
+
             leaf oid {
                 type string;
             }
@@ -79,6 +85,12 @@ module snmp {
                 type inet:ipv4-address;
             }
 
+            leaf port {
+                type inet:port-number;
+                default 161;
+                mandatory false;
+            }
+
             leaf oid {
                 type string;
             }
@@ -99,6 +111,12 @@ module snmp {
                 type inet:ipv4-address;
             }
 
+            leaf port {
+                type inet:port-number;
+                default 161;
+                mandatory false;
+            }
+
             leaf community {
                 type string;
             }
@@ -113,6 +131,12 @@ module snmp {
         input {
             leaf ip-address {
                 type inet:ipv4-address;
+            }
+
+            leaf port {
+                type inet:port-number;
+                default 161;
+                mandatory false;
             }
 
             leaf community {

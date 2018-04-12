@@ -21,6 +21,7 @@ import java.util.concurrent.Future;
 import org.opendaylight.snmp.OID;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ieee.types.rev080522.MacAddress;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Counter32;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Counter64;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Gauge32;
@@ -49,12 +50,13 @@ public class MibTable<T> {
     private Map<Integer, T> indexToBuilderObject;
     private final Snmp snmp;
 
-    public MibTable(Snmp snmp, Ipv4Address ipv4Address, String community, Class<T> builderClass) {
+    public MibTable(Snmp snmp, Ipv4Address ipv4Address, PortNumber port, String community, Class<T> builderClass) {
         this.snmp = snmp;
         this.builderClass = builderClass;
         snmpGetInputBuilder = new SnmpGetInputBuilder()
                 .setCommunity(community)
                 .setIpAddress(ipv4Address)
+                .setPort(port)
                 .setGetType(SnmpGetType.GETWALK);
     }
 

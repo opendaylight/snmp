@@ -10,12 +10,14 @@ package org.opendaylight.snmp.plugin.internal;
 
 import static org.opendaylight.snmp.plugin.internal.SNMPImpl.DEFAULT_COMMUNITY;
 import static org.opendaylight.snmp.plugin.internal.SNMPImpl.MAXREPETITIONS;
+import static org.opendaylight.snmp.plugin.internal.SNMPImpl.SNMP_LISTEN_PORT;
 
 import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutputBuilder;
@@ -65,7 +67,8 @@ public class AsyncGetHandler implements ResponseListener {
             community = DEFAULT_COMMUNITY;
         }
 
-        target = SNMPImpl.getTargetForIp(getInput.getIpAddress(), community);
+        PortNumber port = getInput.getPort() != null ? getInput.getPort() : SNMP_LISTEN_PORT;
+        target = SNMPImpl.getTargetForIp(getInput.getIpAddress(), port, community);
         if (snmpGetInput.getGetType().equals(SnmpGetType.GET)) {
             pdu.setType(PDU.GET);
         } else if (snmpGetInput.getGetType().equals(SnmpGetType.GETNEXT)) {

@@ -7,8 +7,11 @@
  */
 package org.opendaylight.snmp.plugin.internal;
 
+import static org.opendaylight.snmp.plugin.internal.SNMPImpl.SNMP_LISTEN_PORT;
+
 import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
@@ -47,7 +50,8 @@ public class AsyncSetHandler implements ResponseListener {
             community = SNMPImpl.DEFAULT_COMMUNITY;
         }
 
-        target = SNMPImpl.getTargetForIp(input.getIpAddress(), community);
+        PortNumber port = input.getPort() != null ? input.getPort() : SNMP_LISTEN_PORT;
+        target = SNMPImpl.getTargetForIp(input.getIpAddress(), port, community);
         oid  = new OID(input.getOid());
         pdu = new PDU();
         pdu.add(new VariableBinding(oid, new OctetString(input.getValue())));

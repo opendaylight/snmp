@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
+import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.PortNumber;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntry;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.interfaces.group.IfEntryBuilder;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.GetInterfacesInput;
@@ -51,7 +52,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(SNMPImpl.class);
     static final String DEFAULT_COMMUNITY = "public";
     private Snmp snmp;
-    static final Integer SNMP_LISTEN_PORT = 161;
+    static final PortNumber SNMP_LISTEN_PORT = new PortNumber(161);
     static final int RETRIES = 5;
     static final int TIMEOUT = 1000;
     static final int MAXREPETITIONS = 10000;
@@ -96,10 +97,10 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         return snmp;
     }
 
-    static Target getTargetForIp(Ipv4Address address, String community) {
+    static Target getTargetForIp(Ipv4Address address, PortNumber port, String community) {
         Address addr = null;
         try {
-            addr = new UdpAddress(Inet4Address.getByName(address.getValue()), SNMP_LISTEN_PORT);
+            addr = new UdpAddress(Inet4Address.getByName(address.getValue()), port.getValue());
         } catch (UnknownHostException e) {
             LOG.warn("Failed to create UDP Address", e);
             return null;
@@ -116,8 +117,9 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
     @Override
     public Future<RpcResult<SnmpGetOutput>> snmpGet(SnmpGetInput input) {
-        LOG.debug("Sending {} SNMP request for host: {}, OID: {}, Community: {}", input.getGetType(),
-                input.getIpAddress(), input.getOid(), input.getCommunity());
+        LOG.debug("Sending {} SNMP request for host: {}:{}, OID: {}, Community: {}", input.getGetType(),
+                input.getIpAddress(), input.getPort() != null ? input.getPort() : SNMP_LISTEN_PORT, input.getOid(),
+                input.getCommunity());
         AsyncGetHandler getHandler = new AsyncGetHandler(input, snmp);
         return getHandler.getRpcResponse();
     }
@@ -135,6 +137,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
 
         Runnable nonBlockingPopulateRunnable = () -> {
             MibTable<IfEntryBuilder> ifEntryBuilderMibTable = new MibTable<>(snmp, getInterfacesInput.getIpAddress(),
+                    getInterfacesInput.getPort() != null ? getInterfacesInput.getPort() : SNMP_LISTEN_PORT,
                     getInterfacesInput.getCommunity(), IfEntryBuilder.class);
 
             GetInterfacesOutputBuilder getInterfacesOutputBuilder = new GetInterfacesOutputBuilder();
@@ -176,8 +179,8 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
     public Future<RpcResult<GetNodePropertiesOutput>> getNodeProperties(final GetNodePropertiesInput input) {
-        LOG.debug("getNodeProperties for ip address: {} and community: {}", input.getIpAddress(),
-                input.getCommunity());
+        LOG.debug("getNodeProperties for SNMP agent: {}:{} and community: {}", input.getIpAddress(),
+                input.getPort() != null ? input.getPort() : SNMP_LISTEN_PORT, input.getCommunity());
         SettableFuture<RpcResult<GetNodePropertiesOutput>> nodePropertiesSettableFuture = SettableFuture.create();
         try {
             Map<FieldEnum, String> fieldsMap = getNetConfDeviceInfoUsingSnmp(input);
@@ -221,6 +224,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
         SnmpGetInputBuilder snmpGetInputBuilder = new SnmpGetInputBuilder();
         snmpGetInputBuilder.setCommunity(input.getCommunity());
         snmpGetInputBuilder.setIpAddress(input.getIpAddress());
+        snmpGetInputBuilder.setPort(input.getPort() != null ? input.getPort() : SNMP_LISTEN_PORT);
         snmpGetInputBuilder.setGetType(SnmpGetType.GET);
         AsyncGetHandler getHandler;
         Future<RpcResult<SnmpGetOutput>> snmpGetOutput;
