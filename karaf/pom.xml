@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.snmp</groupId>
     <artifactId>karaf</artifactId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.2-SNAPSHOT</version>
     <name>ODL :: snmp :: ${project.artifactId}</name>
     <packaging>pom</packaging>
 

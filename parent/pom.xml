@@ -12,13 +12,13 @@
   <parent>
       <groupId>org.opendaylight.mdsal</groupId>
       <artifactId>binding-parent</artifactId>
-      <version>0.12.1-SNAPSHOT</version>
+      <version>0.12.2-SNAPSHOT</version>
       <relativePath/>
   </parent>
 
     <groupId>org.opendaylight.snmp</groupId>
     <artifactId>snmp-parent</artifactId>
-    <version>1.5.1-SNAPSHOT</version>
+    <version>1.5.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>The SNMP Project of OpenDaylight addresses the need for a southbound plugin that allows applications and controller services to interact with devices using SNMP. The SNMP southbound plugin will allow applications acting as an SNMP Manager to interact with devices that support an SNMP agent.</description>
@@ -44,7 +44,7 @@
 
     <properties>
         <apache.servicemix.version>2.3.1_1</apache.servicemix.version>
-        <snmp.version>1.5.1-SNAPSHOT</snmp.version>
+        <snmp.version>1.5.2-SNAPSHOT</snmp.version>
     </properties>
 
     <dependencyManagement>
@@ -59,7 +59,7 @@
             <dependency>
                 <groupId>org.opendaylight.controller</groupId>
                 <artifactId>mdsal-artifacts</artifactId>
-                <version>1.7.1-SNAPSHOT</version>
+                <version>1.7.2-SNAPSHOT</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
