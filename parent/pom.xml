@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.snmp</groupId>
     <artifactId>snmp-parent</artifactId>
-    <version>1.4.3-SNAPSHOT</version>
+    <version>1.4.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>The SNMP Project of OpenDaylight addresses the need for a southbound plugin that allows applications and controller services to interact with devices using SNMP. The SNMP southbound plugin will allow applications acting as an SNMP Manager to interact with devices that support an SNMP agent.</description>
@@ -43,14 +43,14 @@
     </scm>
 
     <properties>
-        <yangtools.version>1.2.3-SNAPSHOT</yangtools.version>
-        <mdsal.version>1.6.3-SNAPSHOT</mdsal.version>
-        <mdsal.java.binding.version>0.11.3-SNAPSHOT</mdsal.java.binding.version>
-        <mdsal.model.version>1.6.3-SNAPSHOT</mdsal.model.version>
-        <config.version>0.7.3-SNAPSHOT</config.version>
+        <yangtools.version>1.2.4-SNAPSHOT</yangtools.version>
+        <mdsal.version>1.6.4-SNAPSHOT</mdsal.version>
+        <mdsal.java.binding.version>0.11.4-SNAPSHOT</mdsal.java.binding.version>
+        <mdsal.model.version>1.6.4-SNAPSHOT</mdsal.model.version>
+        <config.version>0.7.4-SNAPSHOT</config.version>
         <apache.servicemix.version>2.3.1_1</apache.servicemix.version>
         <snmp.impl.configfile>snmp-impl.xml</snmp.impl.configfile>
-        <snmp.version>1.4.3-SNAPSHOT</snmp.version>
+        <snmp.version>1.4.4-SNAPSHOT</snmp.version>
     </properties>
 
     <dependencyManagement>
@@ -72,14 +72,14 @@
             <dependency>
               <groupId>org.opendaylight.mdsal</groupId>
               <artifactId>mdsal-artifacts</artifactId>
-              <version>2.3.3-SNAPSHOT</version>
+              <version>2.3.4-SNAPSHOT</version>
               <type>pom</type>
               <scope>import</scope>
             </dependency>
             <dependency>
               <groupId>org.opendaylight.mdsal.model</groupId>
               <artifactId>mdsal-model-artifacts</artifactId>
-              <version>0.11.3-SNAPSHOT</version>
+              <version>0.11.4-SNAPSHOT</version>
               <type>pom</type>
               <scope>import</scope>
             </dependency>

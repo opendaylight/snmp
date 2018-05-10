@@ -19,7 +19,7 @@
 
     <groupId>org.opendaylight.snmp</groupId>
     <artifactId>snmp-artifacts</artifactId>
-    <version>1.4.3-SNAPSHOT</version>
+    <version>1.4.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <prerequisites>
