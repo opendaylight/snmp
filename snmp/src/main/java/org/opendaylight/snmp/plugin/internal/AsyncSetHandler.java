@@ -10,6 +10,8 @@ package org.opendaylight.snmp.plugin.internal;
 import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetOutput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetOutputBuilder;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -30,7 +32,7 @@ import org.snmp4j.smi.VariableBinding;
 
 public class AsyncSetHandler implements ResponseListener {
     private static final Logger LOG = LoggerFactory.getLogger(AsyncSetHandler.class);
-    private SettableFuture<RpcResult<Void>> rpcResultSettableFuture;
+    private SettableFuture<RpcResult<SnmpSetOutput>> rpcResultSettableFuture;
     private final Snmp snmp4j;
     private final SnmpSetInput snmpSetInput;
     private final Target target;
@@ -59,13 +61,12 @@ public class AsyncSetHandler implements ResponseListener {
             snmp4j.set(pdu, target, null, this);
         } catch (IOException e) {
             LOG.warn(e.getMessage());
-            RpcResultBuilder<Void> rpcResultBuilder = RpcResultBuilder.failed();
-            rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION, e.getMessage());
-            rpcResultSettableFuture.set(rpcResultBuilder.build());
+            rpcResultSettableFuture.set(RpcResultBuilder.<SnmpSetOutput>failed()
+                    .withError(RpcError.ErrorType.APPLICATION, e.getMessage()).build());
         }
     }
 
-    public SettableFuture<RpcResult<Void>> getRpcResponse() {
+    public SettableFuture<RpcResult<SnmpSetOutput>> getRpcResponse() {
         rpcResultSettableFuture = SettableFuture.create();
         sendSnmpSet();
         return rpcResultSettableFuture;
@@ -109,7 +110,7 @@ public class AsyncSetHandler implements ResponseListener {
         // JavaDocs state not doing the following will cause a leak
         ((Snmp)responseEvent.getSource()).cancel(responseEvent.getRequest(), this);
 
-        RpcResultBuilder<Void> rpcResultBuilder;
+        RpcResultBuilder<SnmpSetOutput> rpcResultBuilder;
         PDU responseEventPDU = responseEvent.getResponse();
         if (responseEventPDU != null) {
             int errorStatus = responseEventPDU.getErrorStatus();
@@ -130,9 +131,8 @@ public class AsyncSetHandler implements ResponseListener {
                         // We're out of data types to try.
                         // Return an error and set the future.
 
-                        rpcResultBuilder = RpcResultBuilder.failed();
-                        rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
-                                "SnmpSET failed. Unknown object set type");
+                        rpcResultBuilder = RpcResultBuilder.<SnmpSetOutput>failed().withError(
+                                RpcError.ErrorType.APPLICATION, "SnmpSET failed. Unknown object set type");
                     }
 
                 } else {
@@ -140,19 +140,18 @@ public class AsyncSetHandler implements ResponseListener {
                     int errorIndex = responseEventPDU.getErrorIndex();
                     String errorString = responseEventPDU.getErrorStatusText();
 
-                    rpcResultBuilder = RpcResultBuilder.failed();
-                    rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
+                    rpcResultBuilder = RpcResultBuilder.<SnmpSetOutput>failed().withError(
+                            RpcError.ErrorType.APPLICATION,
                             String.format("SnmpSET failed with error status: %s, error index: %s. StatusText: %s",
                                     errorStatus, errorIndex, errorString));
                 }
             } else {
-                rpcResultBuilder = RpcResultBuilder.success();
+                rpcResultBuilder = RpcResultBuilder.success(new SnmpSetOutputBuilder().build());
             }
 
         } else {
             // Response Event PDU was null
-            rpcResultBuilder = RpcResultBuilder.failed();
-            rpcResultBuilder.withError(RpcError.ErrorType.APPLICATION,
+            rpcResultBuilder = RpcResultBuilder.<SnmpSetOutput>failed().withError(RpcError.ErrorType.APPLICATION,
                     "SNMP set timed out.");
         }
 

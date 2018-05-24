@@ -44,6 +44,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetInput
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInputBuilder;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetOutput;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.snmp.get.output.Results;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.snmp4j.PDU;
@@ -214,9 +215,7 @@ public class SNMPImplTest {
         input.setOid(LOCATION_OID);
         input.setValue(VALUE);
 
-        RpcResult<Void> result = null;
-        Future<RpcResult<Void>> resultFuture = snmpImpl.snmpSet(input.build());
-        result = resultFuture.get();
+        RpcResult<SnmpSetOutput> result  = snmpImpl.snmpSet(input.build()).get();
         assertTrue(result.isSuccessful());
     }
 

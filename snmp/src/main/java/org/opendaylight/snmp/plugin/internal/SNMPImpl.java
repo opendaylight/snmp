@@ -8,6 +8,7 @@
 package org.opendaylight.snmp.plugin.internal;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -33,6 +34,7 @@ import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetOutpu
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpGetType;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpService;
 import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetInput;
+import org.opendaylight.yang.gen.v1.urn.opendaylight.snmp.rev140922.SnmpSetOutput;
 import org.opendaylight.yangtools.yang.common.RpcError;
 import org.opendaylight.yangtools.yang.common.RpcResult;
 import org.opendaylight.yangtools.yang.common.RpcResultBuilder;
@@ -115,7 +117,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     }
 
     @Override
-    public Future<RpcResult<SnmpGetOutput>> snmpGet(SnmpGetInput input) {
+    public ListenableFuture<RpcResult<SnmpGetOutput>> snmpGet(SnmpGetInput input) {
         LOG.debug("Sending {} SNMP request for host: {}, OID: {}, Community: {}", input.getGetType(),
                 input.getIpAddress(), input.getOid(), input.getCommunity());
         AsyncGetHandler getHandler = new AsyncGetHandler(input, snmp);
@@ -123,13 +125,12 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
     }
 
     @Override
-    public Future<RpcResult<Void>> snmpSet(SnmpSetInput input) {
-        AsyncSetHandler setHandler = new AsyncSetHandler(input, snmp);
-        return setHandler.getRpcResponse();
+    public ListenableFuture<RpcResult<SnmpSetOutput>> snmpSet(SnmpSetInput input) {
+        return new AsyncSetHandler(input, snmp).getRpcResponse();
     }
 
     @Override
-    public Future<RpcResult<GetInterfacesOutput>> getInterfaces(final GetInterfacesInput getInterfacesInput) {
+    public ListenableFuture<RpcResult<GetInterfacesOutput>> getInterfaces(final GetInterfacesInput getInterfacesInput) {
 
         final SettableFuture<RpcResult<GetInterfacesOutput>> settableFuture = SettableFuture.create();
 
@@ -175,7 +176,7 @@ public class SNMPImpl implements SnmpService, AutoCloseable {
      */
     @Override
     @SuppressWarnings("checkstyle:IllegalCatch")
-    public Future<RpcResult<GetNodePropertiesOutput>> getNodeProperties(final GetNodePropertiesInput input) {
+    public ListenableFuture<RpcResult<GetNodePropertiesOutput>> getNodeProperties(final GetNodePropertiesInput input) {
         LOG.debug("getNodeProperties for ip address: {} and community: {}", input.getIpAddress(),
                 input.getCommunity());
         SettableFuture<RpcResult<GetNodePropertiesOutput>> nodePropertiesSettableFuture = SettableFuture.create();
