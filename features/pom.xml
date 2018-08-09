@@ -17,7 +17,7 @@
 
     <groupId>org.opendaylight.snmp</groupId>
     <artifactId>features-snmp-aggregator</artifactId>
-    <version>1.5.3-SNAPSHOT</version>
+    <version>1.5.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
