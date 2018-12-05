@@ -18,7 +18,7 @@
 
     <groupId>org.opendaylight.snmp</groupId>
     <artifactId>odl-snmp-plugin</artifactId>
-    <version>1.5.4-SNAPSHOT</version>
+    <version>1.5.4</version>
     <packaging>feature</packaging>
 
     <name>OpenDaylight :: snmp-plugin :: SNMP</name>
@@ -27,14 +27,14 @@
         <dependency>
             <groupId>org.opendaylight.mdsal.model</groupId>
             <artifactId>odl-mdsal-models</artifactId>
-            <version>0.12.4-SNAPSHOT</version>
+            <version>0.12.4</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
         <dependency>
             <groupId>org.opendaylight.controller</groupId>
             <artifactId>odl-mdsal-broker</artifactId>
-            <version>1.7.4-SNAPSHOT</version>
+            <version>1.7.4</version>
             <type>xml</type>
             <classifier>features</classifier>
         </dependency>
