@@ -103,7 +103,7 @@ public class AsyncGetHandler implements ResponseListener {
                     stop = true;
                 }
                 if (response.getErrorStatus() != PDU.noError) {
-                    LOG.error("Error: " + response.getErrorStatusText());
+                    LOG.error("Response error: {}", response.getErrorStatusText());
                     stop = true;
                 }
             } else {
@@ -138,7 +138,7 @@ public class AsyncGetHandler implements ResponseListener {
 
     private void setResult(Throwable failure) {
         boolean success = failure == null;
-        LOG.debug("Setting result, success=" + success);
+        LOG.debug("Setting result, success={}", success);
 
         SnmpGetOutputBuilder getOutputBuilder = new SnmpGetOutputBuilder().setResults(resultsArrayList);
 

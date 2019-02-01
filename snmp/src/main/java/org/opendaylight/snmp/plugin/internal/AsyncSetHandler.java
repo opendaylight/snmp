@@ -60,7 +60,7 @@ public class AsyncSetHandler implements ResponseListener {
         try {
             snmp4j.set(pdu, target, null, this);
         } catch (IOException e) {
-            LOG.warn(e.getMessage());
+            LOG.warn("Error sending set", e);
             rpcResultSettableFuture.set(RpcResultBuilder.<SnmpSetOutput>failed()
                     .withError(RpcError.ErrorType.APPLICATION, e.getMessage()).build());
         }

@@ -206,7 +206,7 @@ public class MibTable<T> {
                 try {
                     method.invoke(builderObject, setObject);
                 } catch (InvocationTargetException | IllegalArgumentException e) {
-                    LOG.debug(String.format("Error invoking %s with %s", method.getName(), setObject), e);
+                    LOG.debug("Error invoking {} with {}", method.getName(), setObject, e);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
                 LOG.warn("Populate Exception", e);

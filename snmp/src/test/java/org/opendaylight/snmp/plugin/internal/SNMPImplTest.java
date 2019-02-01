@@ -10,8 +10,8 @@ package org.opendaylight.snmp.plugin.internal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -28,7 +28,6 @@ import java.util.concurrent.Future;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.inet.types.rev130715.Ipv4Address;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.ietf.yang.types.rev130715.Counter32;
 import org.opendaylight.yang.gen.v1.urn.ietf.params.xml.ns.yang.smiv2._if.mib.rev000614.InterfaceIndex;
@@ -111,33 +110,19 @@ public class SNMPImplTest {
             ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
             callback.onResponse(event);
             return null;
-        }).when(mockSnmp).send(argThat(new ArgumentMatcher<PDU>() {
-            @Override
-            public boolean matches(Object argument) {
-                if (argument instanceof PDU) {
-                    PDU pdu = (PDU)argument;
-                    assertEquals("Checking PDU Get type", pdu.getType(), PDU.GET);
-                    assertEquals("Checking PDU OID value", pdu.getVariableBindings().get(0).getOid().toString(),
-                            SYS_OID_REQUEST);
-                    assertEquals("Checking max repititions", pdu.getMaxRepetitions(), MAXREPETITIONS);
-                    return true;
-                }
-                return false;
-            }
-        }), argThat(new ArgumentMatcher<Target>() {
-            @Override
-            public boolean matches(Object argument) {
-                if (argument instanceof Target) {
-                    Target target = (Target) argument;
-                    assertEquals(target.getSecurityName().toString(), COMMUNITY);
-                    assertEquals(target.getAddress().toString(), GET_IP_ADDRESS + "/" + SNMP_LISTEN_PORT.toString());
-                    assertEquals(target.getTimeout(), TIMEOUT);
-                    assertEquals(target.getRetries(), RETRIES);
-                    assertEquals(target.getVersion(), SnmpConstants.version2c);
-                    return true;
-                }
-                return false;
-            }
+        }).when(mockSnmp).send(argThat(pdu -> {
+            assertEquals("Checking PDU Get type", pdu.getType(), PDU.GET);
+            assertEquals("Checking PDU OID value", pdu.getVariableBindings().get(0).getOid().toString(),
+                    SYS_OID_REQUEST);
+            assertEquals("Checking max repititions", pdu.getMaxRepetitions(), MAXREPETITIONS);
+            return true;
+        }), argThat(target -> {
+            assertEquals(target.getSecurityName().toString(), COMMUNITY);
+            assertEquals(target.getAddress().toString(), GET_IP_ADDRESS + "/" + SNMP_LISTEN_PORT.toString());
+            assertEquals(target.getTimeout(), TIMEOUT);
+            assertEquals(target.getRetries(), RETRIES);
+            assertEquals(target.getVersion(), SnmpConstants.version2c);
+            return true;
         }), any(), (ResponseListener) any());
 
         String value = "Failed";
@@ -178,34 +163,28 @@ public class SNMPImplTest {
             ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
             callback.onResponse(event);
             return null;
-        }).when(mockSnmp).set(argThat(new ArgumentMatcher<PDU>() {
-            @Override
-            public boolean matches(Object argument) {
-                if (argument instanceof PDU) {
-                    PDU pdu = (PDU) argument;
-                    assertEquals("Checking SET PDU type", pdu.getType(), PDU.SET);
-                    assertEquals("Checking Value of SET", pdu.getVariableBindings().get(0).toValueString(), VALUE);
-                    assertEquals("Checking OID of SET", pdu.getVariableBindings().get(0).getOid().toString(),
-                            LOCATION_OID);
-                    return true;
-                }
-                return false;
+        }).when(mockSnmp).set(argThat(argument -> {
+            if (argument instanceof PDU) {
+                PDU pdu = (PDU) argument;
+                assertEquals("Checking SET PDU type", pdu.getType(), PDU.SET);
+                assertEquals("Checking Value of SET", pdu.getVariableBindings().get(0).toValueString(), VALUE);
+                assertEquals("Checking OID of SET", pdu.getVariableBindings().get(0).getOid().toString(),
+                        LOCATION_OID);
+                return true;
             }
-        }), argThat(new ArgumentMatcher<Target>() {
-            @Override
-            public boolean matches(Object argument) {
-                if (argument instanceof Target) {
-                    Target target = (Target) argument;
-                    assertEquals("Checking community of SET", target.getSecurityName().toString(), COMMUNITY);
-                    assertEquals("Checking target IP", target.getAddress().toString(),
-                            SET_IP_ADDRESS + "/" + SNMP_LISTEN_PORT.toString());
-                    assertEquals("Checking timeout", target.getTimeout(), TIMEOUT);
-                    assertEquals("Checking retries", target.getRetries(), RETRIES);
-                    assertEquals("Checking version", target.getVersion(), SnmpConstants.version2c);
-                    return true;
-                }
-                return false;
+            return false;
+        }), argThat(argument -> {
+            if (argument instanceof Target) {
+                Target target = (Target) argument;
+                assertEquals("Checking community of SET", target.getSecurityName().toString(), COMMUNITY);
+                assertEquals("Checking target IP", target.getAddress().toString(),
+                        SET_IP_ADDRESS + "/" + SNMP_LISTEN_PORT.toString());
+                assertEquals("Checking timeout", target.getTimeout(), TIMEOUT);
+                assertEquals("Checking retries", target.getRetries(), RETRIES);
+                assertEquals("Checking version", target.getVersion(), SnmpConstants.version2c);
+                return true;
             }
+            return false;
         }), any(), (ResponseListener) any());
 
         Ipv4Address ip = new Ipv4Address(SET_IP_ADDRESS);
@@ -423,33 +402,27 @@ public class SNMPImplTest {
             ResponseListener callback = (ResponseListener) invocation.getArguments()[3];
             callback.onResponse(responseEvent);
             return null;
-        }).when(mockSnmp).send(argThat(new ArgumentMatcher<PDU>() {
-            @Override
-            public boolean matches(Object argument) {
-                if (argument instanceof PDU) {
-                    PDU pdu = (PDU) argument;
-                    assertEquals("Checking PDU Get type", pdu.getType(), PDU.GETBULK);
-                    assertTrue("Checking PDU OID value", pdu.getVariableBindings().get(0).getOid().toString()
-                            .startsWith(SYS_OID_REQUEST));
-                    assertEquals("Checking max repetitions", pdu.getMaxRepetitions(), MAXREPETITIONS);
-                    return true;
-                }
-                return false;
+        }).when(mockSnmp).send(argThat(argument -> {
+            if (argument instanceof PDU) {
+                PDU pdu = (PDU) argument;
+                assertEquals("Checking PDU Get type", pdu.getType(), PDU.GETBULK);
+                assertTrue("Checking PDU OID value", pdu.getVariableBindings().get(0).getOid().toString()
+                        .startsWith(SYS_OID_REQUEST));
+                assertEquals("Checking max repetitions", pdu.getMaxRepetitions(), MAXREPETITIONS);
+                return true;
             }
-        }), argThat(new ArgumentMatcher<Target>() {
-            @Override
-            public boolean matches(Object argument) {
-                if (argument instanceof Target) {
-                    Target target = (Target) argument;
-                    assertEquals(target.getSecurityName().toString(), COMMUNITY);
-                    assertEquals(target.getAddress().toString(), GET_IP_ADDRESS + "/" + SNMP_LISTEN_PORT.toString());
-                    assertEquals(target.getTimeout(), TIMEOUT);
-                    assertEquals(target.getRetries(), RETRIES);
-                    assertEquals(target.getVersion(), SnmpConstants.version2c);
-                    return true;
-                }
-                return false;
+            return false;
+        }), argThat(argument -> {
+            if (argument instanceof Target) {
+                Target target = (Target) argument;
+                assertEquals(target.getSecurityName().toString(), COMMUNITY);
+                assertEquals(target.getAddress().toString(), GET_IP_ADDRESS + "/" + SNMP_LISTEN_PORT.toString());
+                assertEquals(target.getTimeout(), TIMEOUT);
+                assertEquals(target.getRetries(), RETRIES);
+                assertEquals(target.getVersion(), SnmpConstants.version2c);
+                return true;
             }
+            return false;
         }), any(), (ResponseListener) any());
 
         Ipv4Address ip = new Ipv4Address(GET_IP_ADDRESS);
