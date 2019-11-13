@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fafc7978_d5b547ce",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 2759
+      },
+      "writtenOn": "2017-01-30T18:20:27Z",
+      "side": 1,
+      "message": "There should be a blank line following the 1st summary line so that git log correctly outputs the message format.",
+      "revId": "26d2f871e26c2f14ac57993eb12197f6da9f193b",
+      "serverId": "7fc14799-209e-464c-9743-7a06c2c21a81",
+      "unresolved": false
+    }
+  ]
+}
