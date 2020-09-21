@@ -1,4 +1,5 @@
 # UUID                                                              	Group Name
 #
+af238619b200a263c1efcb761606d9865ccd6204                            	saml/odl-gerrit-snmp-committers
 c9025ab9ddc1e3171919e085449f22c54f8f7b54                            	GitHub Replication
 ldap:cn=odl-gerrit-snmp-committers,ou=Groups,dc=freestandards,dc=org	ldap/odl-gerrit-snmp-committers
